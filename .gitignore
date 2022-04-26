@@ -1,6 +1,9 @@
 # build directories
 _build*
 
+# clangd requirements
+compile_commands.json
+
 # Prerequisites
 *.d
 
