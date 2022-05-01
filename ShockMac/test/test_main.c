@@ -1,10 +1,17 @@
 #include "munit/munit.h"
 
 extern MunitTest fix_tests[];
+extern MunitTest fix24_tests[];
 
 static MunitSuite extern_suites[] = {
 	{	.prefix = "/fix",
 		.tests = fix_tests,
+		.suites = NULL,
+		.iterations = 1,
+		.options = MUNIT_SUITE_OPTION_NONE
+	},
+	{	.prefix = "/fix24",
+		.tests = fix24_tests,
 		.suites = NULL,
 		.iterations = 1,
 		.options = MUNIT_SUITE_OPTION_NONE

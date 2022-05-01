@@ -37,9 +37,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 fix fix_sqrt(fix num)
 {
 	// convert to float, use c-libraries sqrt function, convert back to fix
-	float fnum = (float) num / 65536.0f;
+	float fnum = fix_float(num);
 	if (fnum > 0.0f) {
-		return (fix) (sqrtf(fnum) * 65536.0f);
+		return fix_from_float(sqrtf(fnum));
+	} else {
+		return 0;
+	}
+}
+
+fix24 fix24_sqrt (fix24 x) {
+	// convert to float, use c-libraries sqrt function, convert back to fix
+	float fnum = fix24_float(x);
+	if (fnum > 0.0f) {
+		return fix24_from_float(sqrtf(fnum));
 	} else {
 		return 0;
 	}
@@ -57,4 +67,3 @@ fix quad_sqrt(int32_t hi, int32_t lo)
 		return 0;
 	}
 }
-
