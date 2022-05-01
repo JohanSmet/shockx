@@ -25,3 +25,6 @@ endif()
 
 # libraries
 include(ShockMac/Libraries/CMakeLists.txt)
+
+# unit tests
+include(ShockMac/test/CMakeLists.txt)

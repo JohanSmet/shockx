@@ -217,7 +217,7 @@ typedef fix fix16;
 #define FIXANG_PI 0x8000
 #define fix_2pi fix_make(6,18559) // that's 6 + 18559/65536 = 6.28319
 
-typedef ushort fixang;
+typedef uint16_t fixang;
 
 /* makes a fixed point number with integral part a and fractional part b. */
 #define fix_make(a,b) ((((int32_t)(a))<<16)|(b))
