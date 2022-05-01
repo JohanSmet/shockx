@@ -24,4 +24,4 @@ if (NOT HAVE_FLOOR)
 endif()
 
 # libraries
-add_subdirectory(ShockMac/Libraries)
+include(ShockMac/Libraries/CMakeLists.txt)
