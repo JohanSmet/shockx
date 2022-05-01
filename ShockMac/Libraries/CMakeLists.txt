@@ -24,6 +24,15 @@ target_include_directories(${TARGET_LIB_FIX} PUBLIC ${DIR_LIB_FIX})
 target_include_directories(${TARGET_LIB_FIX} PUBLIC ${DIR_LIB}/H)
 target_link_libraries(${TARGET_LIB_FIX} PRIVATE ${LIBS_MATH})
 
+# Fixed point math utilities
+if (BUILD_UTILS)
+	set (TARGET_MAKE_TABLES make_tables)
+	add_executable(${TARGET_MAKE_TABLES})
+	target_sources(${TARGET_MAKE_TABLES} PRIVATE
+		${DIR_LIB}/FIX/Utils/fmaketab.cpp
+	)
+	target_include_directories(${TARGET_MAKE_TABLES} PUBLIC ${DIR_LIB}/H)
+endif()
 
 # LG
 set (TARGET_LIB_LG lg)

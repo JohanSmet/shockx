@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 /* fmaketab.cc
 **
@@ -43,32 +43,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ** Revision 1.2  1993/06/03  11:52:21  dfan
 ** round instead of truncate
-** 
+**
 ** Revision 1.1  1993/06/01  14:15:33  dfan
 ** Initial revision
-** 
+**
 */
 
-#include <iostream.h>
+#include <iostream>
 //#include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
-#include "lg_types.h"
+#include <lg_types.h>
+
+using namespace std;
 
 const int entries_per_line = 8;
 const double two_pi = 6.283185306 ;
 
-ushort sins[256];
-ushort asins[129];
+uint16_t sins[256];
+uint16_t asins[129];
 
 void do_exp_table (void);
 
-main ()
+int main ()
 {
 
-   cout << "#include \"fix.h\"\n";
-   cout << "#include \"trigtab.h\"\n";
-   cout << "\n";
+	cout << "#include \"fix.h\"\n";
+	cout << "#include \"trigtab.h\"\n";
+	cout << "\n";
 	cout << "// First, the sine table.\n";
 	cout << "// The sine table is indexed by the top 8 bits of a fixang.\n";
 	cout << "// Its units are fix >> 2 (so -1 = 0xc000, 0 = 0x0000, 1 = 0x4000)\n";
@@ -84,19 +86,19 @@ main ()
 		double th = sin (i * two_pi / 256.0);
 		double nth = th * 16384.0;			// normalized theta
 		nth += 0.5; 						// Do always to match PC output table
-		sins[i] = (ushort) nth;		
+		sins[i] = (uint16_t) nth;
 	}
-	
+
 	cout.setf (ios::showbase);
 	cout.setf (ios::internal, ios::adjustfield);
 
-	cout << "ushort sintab[256+64+1] = { // indexed by fixang" << endl;
+	cout << "uint16_t sintab[256+64+1] = { // indexed by fixang" << endl;
 
 	i = 0;
 	while (i < 256)
 	{
 		int j;
-		
+
 		cout << "\t";
 		for (j = 0; j < entries_per_line; j++)
 		{
@@ -113,7 +115,7 @@ main ()
 	while (i < 64)
 	{
 		int j;
-		
+
 		cout << "\t";
 		for (j = 0; j < entries_per_line; j++)
 		{
@@ -150,7 +152,7 @@ main ()
 		double th = asin (-1.0 + i / 64.0);	// the argument ranges from -1.0 to 1.0
 		double nth = (th / two_pi) * 65536.0;
 		nth += 0.5;							// Do this always to match PC table output.
-		asins[i] = (ushort) nth;
+		asins[i] = (uint16_t) nth;
 	}
 
 	cout << "// indexed by (high 8 bits of (fix >> 2 + 0x4000)" << endl;
@@ -159,7 +161,7 @@ main ()
 	while (i < 128)
 	{
 		int j;
-		
+
 		cout << "\t";
 		for (j = 0; j < entries_per_line; j++)
 		{
@@ -175,7 +177,7 @@ main ()
 	cout.fill('0');
 	cout << hex << asins[i] << endl
 		 << "};" << endl << endl;
-	
+
 	do_exp_table ();
 
 	exit (0);
@@ -193,24 +195,24 @@ void do_exp_table (void)
 	cout.unsetf (ios::showbase);
 	cout << "#define INTEGER_EXP_OFFSET " << dec << INTEGER_EXP_OFFSET << endl << endl;
 
-	ulong exps[INTEGER_EXP_OFFSET*2 + 1];
+	uint32_t exps[INTEGER_EXP_OFFSET*2 + 1];
 	int i;
 	for (i = -INTEGER_EXP_OFFSET; i <= INTEGER_EXP_OFFSET; i++)
 	{
 		double e = exp (i) * 65536.0 + 0.5;
-		exps[i+INTEGER_EXP_OFFSET] = (ulong) e;
+		exps[i+INTEGER_EXP_OFFSET] = (uint32_t) e;
 	}
 
 	cout.setf (ios::showbase);
 	cout.setf (ios::internal, ios::adjustfield);
 
-	cout << "ulong expinttab[INTEGER_EXP_OFFSET*2+1] = {" << endl;
+	cout << "uint32_t expinttab[INTEGER_EXP_OFFSET*2+1] = {" << endl;
 	i = 0;
 	int exp_entries_per_line = 4;
 	while (i < INTEGER_EXP_OFFSET * 2 + 1)
 	{
 		int j;
-		
+
 		cout << "\t";
 		for (j = 0; j < exp_entries_per_line && j+i < INTEGER_EXP_OFFSET * 2 + 1; j++)
 		{
@@ -228,22 +230,22 @@ void do_exp_table (void)
 	cout << "// accuracy later if we need it.  So this input to this table goes\n";
 	cout << "// from 0 to 1 by sixteenths.\n\n";
 
-	ulong fracexps[16+1];
+	uint32_t fracexps[16+1];
 	for (i = 0; i <= 16; i++)
 	{
 		double e = exp (i/16.0) * 65536.0 + 0.5;
-		fracexps[i] = (ulong) e;
+		fracexps[i] = (uint32_t) e;
 	}
 
 	cout.setf (ios::showbase);
 	cout.setf (ios::internal, ios::adjustfield);
 
-	cout << "ulong expfractab[16+1] = {" << endl;
+	cout << "uint32_t expfractab[16+1] = {" << endl;
 	i = 0;
 	while (i < 16+1)
 	{
 		int j;
-		
+
 		cout << "\t";
 		for (j = 0; j < exp_entries_per_line && j+i < 16+1; j++)
 		{
