@@ -38,7 +38,11 @@ fix fix_sqrt(fix num)
 {
 	// convert to float, use c-libraries sqrt function, convert back to fix
 	float fnum = (float) num / 65536.0f;
-	return (fix) (sqrtf(fnum) * 65536.0f);
+	if (fnum > 0.0f) {
+		return (fix) (sqrtf(fnum) * 65536.0f);
+	} else {
+		return 0;
+	}
 }
 
 //-----------------------------------------------------------------
@@ -47,6 +51,10 @@ fix fix_sqrt(fix num)
 fix quad_sqrt(int32_t hi, int32_t lo)
 {
 	double num = (double) hi + ((double) lo / 4294967296.0);
-	return (fix) (sqrt(num) * 65536.0);
+	if (num > 0.0f) {
+		return (fix) (sqrt(num) * 65536.0);
+	} else {
+		return 0;
+	}
 }
 
