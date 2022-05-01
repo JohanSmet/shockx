@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 project(shockx)
 
 # options
+option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_UTILS "Build utility programs" OFF)
 
 # export a JSON compilation database for clangd
@@ -30,4 +31,6 @@ endif()
 include(ShockMac/Libraries/CMakeLists.txt)
 
 # unit tests
-include(ShockMac/test/CMakeLists.txt)
+if (BUILD_TESTS)
+	include(ShockMac/test/CMakeLists.txt)
+endif()
