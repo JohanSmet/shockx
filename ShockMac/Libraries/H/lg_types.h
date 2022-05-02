@@ -35,10 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __TYPES_H
 #define __TYPES_H
 
-#ifndef _H2INC		//don't redefine byte in assembly header
-/* this is a signed byte */
-typedef signed char byte;
-#endif /* !_H2INC */
+#include <stdbool.h>
+#include <stdint.h>
 
 /* these are convenience typedefs so we don't always have to keep typing
    `unsigned.' */

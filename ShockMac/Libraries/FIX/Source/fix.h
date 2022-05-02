@@ -160,9 +160,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __FIX_H
 #define __FIX_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "lg_types.h"
 
 // Globals
