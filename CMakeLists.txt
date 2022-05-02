@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.12)
 
 project(shockx)
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # options
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_UTILS "Build utility programs" OFF)

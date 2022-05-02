@@ -41,11 +41,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* these are convenience typedefs so we don't always have to keep typing
    `unsigned.' */
 typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-// typedef unsigned char bool;
-typedef unsigned char ubyte;
+typedef uint16_t ushort;
+typedef uint32_t uint;
+typedef uint32_t ulong;
+typedef uint8_t  ubyte;
 
 #ifndef NULL
 #define NULL 0
