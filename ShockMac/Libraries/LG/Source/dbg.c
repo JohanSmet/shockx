@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		DBG.C		Debug/reporting system
 //		Rex E. Bradford (REX)
@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //		turned on and off at runtime at a fine level of detail, by putting
 //		different instances of such code into a set of categories (banks
 //		and slots), each with independent control.
-//		
+//
 //		If a set of debug code is turned on, it is executed.  If a spew
 //		message is turned on, it is sent to the reporting system, where
 //		it may be logged on the monochrome screen and/or logged to a file.
@@ -327,7 +327,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //		projdbg.H	- Generated from projdbg.DBG (using DBGMAKEH tool), has
 //					#defines for bank/slot/src constants.  This file
 //					should be located in the same directory as the .DBG file.
-//		
+//
 //		Then, the startup code in a program should contain:
 //
 //			DbgInit() - optional, will auto-load "debug.dbg" debug settings
@@ -347,7 +347,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * $Log: dbg.c $
  * Revision 1.18  1994/09/07  17:20:10  dfan
  * Spews would not get sent to a file unless mono flag was on too
- * 
+ *
  * Revision 1.17  1994/08/12  17:05:19  jak
  * Split up decl of DbgSetReportRoutine() to make
  * Externed some things for use by dbgpp.cc
@@ -359,62 +359,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Externed some things for use by dbgpp.cc
  * Split up decl of DbgSetReportRoutine() to make
  * c++ compiler happy
- * 
+ *
  * Revision 1.16  1994/08/11  10:26:59  dfan
  * DbgSpewTest would succeed if any slot in src's bank had
  * a file attached to it
- * 
+ *
  * Revision 1.15  1994/08/09  13:53:05  kaboom
  * Changed call to vsprintf() to lg_sprintf().
- * 
+ *
  * Revision 1.14  1994/02/28  10:53:31  rex
  * Moved DbgGetKey() from dbgcfg.c to here
- * 
+ *
  * Revision 1.13  1993/07/16  14:29:53  rex
  * Doubled Report routine's msg buffer to 1024 bytes (it's on the stack,
  * so I hope this is ok).
- * 
+ *
  * Revision 1.12  1993/07/09  09:33:21  rex
  * Added #ifdef's to delete most of code when DBG_ON and SPEW_ON undefined
- * 
+ *
  * Revision 1.11  1993/03/25  12:54:10  rex
  * Changed report handler to put tag on print msg too.
- * 
+ *
  * Revision 1.10  1993/02/25  12:53:04  rex
  * Removed exit code and put in exit.c
- * 
+ *
  * Revision 1.9  1993/02/16  13:41:16  rex
  * Fixed 2 bugs (WARNING/WARNUSER tags reversed, wasn't logging WARNINGS)
- * 
+ *
  * Revision 1.8  1993/02/04  20:04:10  rex
  * Changed DbgExit() to Exit(), etc.
- * 
+ *
  * Revision 1.7  1993/02/04  13:17:55  rex
  * Fixed bug in DbgSetLogFile()
- * 
+ *
  * Revision 1.6  1993/02/02  17:07:25  rex
  * Fixed logpath (".\", not "..\")
- * 
+ *
  * Revision 1.5  1993/02/02  16:47:24  rex
  * Changed starting dbgLogPath to "..\\" (instead of empty)
- * 
+ *
  * Revision 1.4  1993/02/02  11:58:51  rex
  * Fixed strncpy() bug in slot name
- * 
+ *
  * Revision 1.3  1993/01/29  17:30:39  rex
  * Added arg to Error()
- * 
+ *
  * Revision 1.2  1993/01/29  10:01:38  rex
  * Changed to use Malloc() instead of malloc()
- * 
+ *
  * Revision 1.1  1993/01/29  09:47:56  rex
  * Initial revision
- * 
+ *
 */
 
 #include <stdio.h>
 //#include <stdlib.h>
-//#include <stdarg.h>
+#include <stdarg.h>
 #include <string.h>
 //#include <conio.h>
 
@@ -426,6 +426,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include <kbcook.h>
 //#include <keydefs.h>
 
+void log_output(LogLevel level, const char *source_file, int line, const char *msg, ...) {
+	va_list args;
+
+	switch (level) {
+		case LOG_ERROR:
+			fputs("ERROR: ", stderr);
+			break;
+		case LOG_WARNING:
+			fputs("ERROR: ", stderr);
+			break;
+	}
+
+	va_start(args, msg);
+	vfprintf(stderr, msg, args);
+	va_end(args);
+}
 
 //--------------------------------------------------------
 //  Displays a warning message.  If being compiled for the Shock program, the
@@ -436,12 +452,12 @@ void DoWarningMsg(char *msg)
 {
 #ifdef SHOCK_GAME
 	Str255	message;
-	
+
 	InitCursor();
 	BlockMove(msg, message+1, 255);
 	message[0] = strlen(msg);
 	ParamText(message, "\p", "\p", "\p");
-	
+
 	StopAlert(1000, nil);
 
 #else

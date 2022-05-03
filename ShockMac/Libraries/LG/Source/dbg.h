@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		DBG.H		Error/debug system
 //		Rex E. Bradford (REX)
@@ -26,89 +26,98 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Externed some things for use by dbgpp.cc
  * Split up decl of DbgSetReportRoutine() to make
  * C++ parser happy
- * 
+ *
  * Revision 1.23  1994/08/11  10:32:00  dfan
  * Make C++ compatible
- * 
+ *
  * Revision 1.22  1994/03/11  11:32:52  dfan
  * DBGS shouldn't have been do/whiled
- * 
+ *
  * Revision 1.21  1994/03/10  15:26:52  eric
  * Fixed bug in Spew -- wasn't wrapped in do {} while (0), so statements like
  * if (condition) Spew(("Hello\n")); else Error(1, "Bye\n");
  * would be evaluated incorrectly.  (else would be bound to wrong if() ).
- * 
+ *
  * Revision 1.20  1993/09/22  19:05:42  jak
  * Oops.  Wrong # of args for Assrt().
- * 
+ *
  * Revision 1.19  1993/09/22  18:51:34  jak
  * Added null 'Assrt()' macro,
- * 
+ *
  * Revision 1.18  1993/09/16  10:02:35  dfan
  * When warnings and spews not on, replace them by do{}while(0), not nothing
  * Otherwise strange things happen, for instance in conditionals
- * 
+ *
  * Revision 1.17  1993/08/11  14:54:23  dfan
  * There was no DBGS macro if DBG_ON wasn't defined
  * Removed some sarcastic comments in the interest of promoting love and harmony
- * 
+ *
  * Revision 1.16  1993/08/10  22:44:44  dc
  * move around stuff to get stuff working for assembler code
- * 
+ *
  * Revision 1.15  1993/08/10  21:36:19  dc
- * attempt to fix broken ifdef nesting from r1.13 on the 9th of July 
+ * attempt to fix broken ifdef nesting from r1.13 on the 9th of July
  * when dbg macros for asm source files were broken
  * but i cant test it since i need to make install to really do an h2i
  * so we will see what happens
- * 
+ *
  * Revision 1.14  1993/07/26  10:27:45  jak
  * Modified Assert() macro to have an ELSE clause so that it does not
  * swallow up an ELSE clause in the caller's code.
  * Added Assrt() macro to call Assert() with a default message
  * for the lazy among us.
- * 
+ *
  * Revision 1.13  1993/07/09  09:32:56  rex
  * Added Assert(), made dummy macro set when DBG_ON is not defined
- * 
+ *
  * Revision 1.12  1993/04/22  13:58:55  rex
  * Changed mono config key install thingy from flag to func ptr
- * 
+ *
  * Revision 1.11  1993/04/22  11:39:23  rex
  * Added macro DbgUseKblib()
- * 
+ *
  * Revision 1.10  1993/03/25  10:50:41  rex
  * Made AtExit() into a macro, instead of function.
- * 
+ *
  * Revision 1.9  1993/03/24  12:19:53  matt
  * Fixed another stupid bug.  You would think I would test these files
  * before I checked them in.
- * 
+ *
  * Revision 1.8  1993/03/24  12:15:37  matt
  * Fixed stupid mistake
- * 
+ *
  * Revision 1.7  1993/03/24  12:12:25  matt
  * Added include for assembly macros
- * 
+ *
  * Revision 1.6  1993/03/04  11:51:41  rex
  * Fixed macros: DbgSetDbg(), DbgSetMono(), DbgSetFunc()
- * 
+ *
  * Revision 1.5  1993/02/25  12:51:30  rex
  * Changed exit-handling functions
- * 
+ *
  * Revision 1.4  1993/02/17  11:17:49  matt
  * Added new macro DBGS(), like DBG(), but based on spew flags
- * 
+ *
  * Revision 1.3  1993/02/04  20:04:32  rex
  * Changed DbgExit() to Exit(), etc.
- * 
+ *
  * Revision 1.2  1993/01/29  17:30:25  rex
  * Added arg to Error()
- * 
+ *
  * Revision 1.1  1993/01/29  09:47:52  rex
  * Initial revision
- * 
+ *
 */
 
+typedef enum {
+	LOG_ERROR	= 0,
+	LOG_WARNING = 1,
+} LogLevel;
+
+void log_output(LogLevel level, const char *source_file, int line, const char *msg, ...);
+
+#define Warning(...)	log_output(LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#define Error(...)		log_output(LOG_ERROR,   __FILE__, __LINE__, __VA_ARGS__)
 
 // Define the only warning I want to do right now - KC
 /*
@@ -119,8 +128,8 @@ void DoWarningMsg(char *msg);
 #define Warning(msg) do {} while (0)
 #endif
 */
-#define Warning(msg) DoWarningMsg msg
-void DoWarningMsg(char *msg);
+//#define Warning(msg) DoWarningMsg msg
+//void DoWarningMsg(char *msg);
 
 /*
 #include <stdio.h>
@@ -218,7 +227,7 @@ extern int errErrCode;
 #ifdef SPEW_ON
 #define DBGS(src,stuff) if (DbgSpewTest(src)) stuff
 #else
-#define DBGS(src,stuff) 
+#define DBGS(src,stuff)
 #endif
 
 //	The important macros:
@@ -308,7 +317,7 @@ int DbgSaveConfig(char *fname);		// save config file
 }
 #endif
 
-// note this is the else DBG_ON from the top of the file, sitting here all 
+// note this is the else DBG_ON from the top of the file, sitting here all
 // alone and lonely in the middle of the file
 #else
 

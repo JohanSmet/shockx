@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		Memall.H		Memory allocator
 //		Rex E. Bradford (REX)
@@ -23,50 +23,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * $Log: memall.h $
  * Revision 1.12  1993/12/20  13:40:05  ept
  * Added MemStackRealloc.
- * 
+ *
  * Revision 1.11  1993/09/30  18:36:51  rex
  * Added prototypes for memgrow.c stuff (heap grow, lock, unlock)
- * 
+ *
  * Revision 1.10  1993/09/13  12:40:12  dfan
  * ptr and size were reserved words in assembler
- * 
+ *
  * Revision 1.9  1993/09/13  11:11:13  dfan
  * Add memstack stuff
- * 
+ *
  * Revision 1.8  1993/08/11  18:44:12  rex
  * Changed Calloc() to macro, so can do spew
- * 
+ *
  * Revision 1.7  1993/08/11  17:30:40  rex
  * Added Spew() versions of malloc/realloc/free, and made uppercase macro
  * versions point to them when DBG is on
- * 
+ *
  * Revision 1.6  1993/04/16  12:59:55  matt
  * Added some void's to functions that took no args to get around h2inc bug.
- * 
+ *
  * Revision 1.5  1993/04/13  16:05:22  rex
  * Added prototypes for MemCheckOn() and MemCheckOff()
- * 
+ *
  * Revision 1.4  1993/03/24  12:02:44  matt
  * More asm header junk
- * 
+ *
  * Revision 1.3  1993/03/16  15:12:39  matt
  * Added junk for H2INC translation to assembly header
- * 
+ *
  * Revision 1.2  1993/02/05  17:38:07  rex
  * Added Calloc() prototype
- * 
+ *
  * Revision 1.1  1993/01/29  09:47:55  rex
  * Initial revision
- * 
+ *
  * Revision 1.3  1993/01/18  12:18:38  rex
  * Changed interface to new standard we all agreed on
- * 
+ *
  * Revision 1.2  1993/01/14  09:41:02  rex
  * Decided Malloc() should never fail, changed interface.
- * 
+ *
  * Revision 1.1  1993/01/12  17:54:54  rex
  * Initial revision
- * 
+ *
 */
 
 
@@ -74,8 +74,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MEMALL_H
 
 
-//#include <malloc.h>
 #include "lg_types.h"
+#include <malloc.h>
 
 /*
 //	Setting, pushing, & popping allocator sets
@@ -115,7 +115,7 @@ void *CallocNorm(size_t size);
 
 #endif
 
-#ifdef _H2INC					//if translating, include assembly macros 
+#ifdef _H2INC					//if translating, include assembly macros
 #include "memmacro.h"		//this will translate to 'include memmacro.inc'
 #endif
 
