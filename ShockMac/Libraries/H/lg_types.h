@@ -40,11 +40,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* these are convenience typedefs so we don't always have to keep typing
    `unsigned.' */
+/*
+JS: don't define these (stdlib has conflicting typedefs) -- replace usage with uint8_t, uint16_t etc.
 typedef unsigned char uchar;
 typedef uint16_t ushort;
 typedef uint32_t uint;
 typedef uint32_t ulong;
 typedef uint8_t  ubyte;
+*/
 
 #ifndef NULL
 #define NULL 0
