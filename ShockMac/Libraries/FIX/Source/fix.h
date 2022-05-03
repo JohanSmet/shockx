@@ -172,7 +172,7 @@ extern int	gOVResult;
 //
 /*  еее Change this
 // Returns 0 if x < 0
-ushort long_sqrt (long x);
+uint16_t long_sqrt (long x);
 #pragma aux long_sqrt parm [eax] value [ax] modify [eax ebx ecx edx esi edi]
 */
 
@@ -381,7 +381,7 @@ typedef int32_t fix24;
 #define fix24_rint(n) (((n)+128)>>8)
 #define fix24_frac(n) ((n)&0xff)
 #define fix24_float(n) ((float)(fix24_int(n)) + (float)(fix24_frac(n))/256.0)
-#define fix24_from_float(n) (fix24_make((short)(floor(n)), (ushort)((n-floor(n))*256.0)))
+#define fix24_from_float(n) (fix24_make((short)(floor(n)), (uint16_t)((n-floor(n))*256.0)))
 
 #define fix24_from_fix16(n) ((n)>>8)
 #define fix16_from_fix24(n) ((n)<<8)

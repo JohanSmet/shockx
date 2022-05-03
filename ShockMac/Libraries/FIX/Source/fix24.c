@@ -136,7 +136,7 @@ fixang fix24_atan2 (fix24 y, fix24 x)
 	// Use fix24_asin or fix24_acos depending on where we are.  We don't want to use
 	// fix24_asin if the sin is close to 1 or -1
 	s = fix24_div (y, hyp);
-	if ((ulong) s < 0x00004000 || (ulong) s > 0xffffc000)
+	if ((uint32_t) s < 0x00004000 || (uint32_t) s > 0xffffc000)
 	{												// range is good, use asin
 		th = fix24_asin (s);
 		if (x < 0)
