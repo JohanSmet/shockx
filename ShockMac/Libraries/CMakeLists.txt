@@ -34,6 +34,17 @@ if (BUILD_UTILS)
 	target_include_directories(${TARGET_MAKE_TABLES} PUBLIC ${DIR_LIB}/H)
 endif()
 
+# Fixed point math (C++)
+set (TARGET_LIB_FIXPP fixpp)
+set (DIR_LIB_FIXPP ${DIR_LIB}/FIXPP/Source)
+
+add_library(${TARGET_LIB_FIXPP} STATIC)
+target_sources(${TARGET_LIB_FIXPP} PRIVATE
+	${DIR_LIB_FIXPP}/fixpp.cpp
+	${DIR_LIB_FIXPP}/fixpp.h
+)
+target_link_libraries(${TARGET_LIB_FIXPP} PUBLIC ${TARGET_LIB_FIX})
+
 # LG
 set (TARGET_LIB_LG lg)
 set (DIR_LIB_LG ${DIR_LIB}/LG/Source)

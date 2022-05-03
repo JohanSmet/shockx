@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 /*
  * $Header: r:/prj/lib/src/fixpp/RCS/fixpp.h 1.45 1994/08/08 18:27:45 ept Exp $
@@ -29,11 +29,9 @@ bravery, and to C++ for being such a complex and neurotic language.
 #ifndef __FIXPP_H
 #define __FIXPP_H
 
-#include <iostream.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+#include <iostream>
 //#include "mprintf.h"
+#include <math.h>
 #include "fix.h"                       // A big thank you to Dan and Matt.
 
 
@@ -97,8 +95,8 @@ public:
    // What?  Me not secure?  I'm no fascist.
    // =========================================================
 
-   ulong bits( void );
-   void setbits( ulong);
+   uint32_t bits( void );
+   void setbits( uint32_t);
 
 
 
@@ -177,7 +175,7 @@ public:
 
 
    Fixpoint operator-( void ) const ;
-   
+
    Fixpoint operator+( void ) const ;
 
 
@@ -203,7 +201,7 @@ public:
    // Fast comparisons with zero (maybe... perhaps Q(0) isn't so slow after all)
    // (and a trip down memory lane for FORTRAN-ites)
    // ====================================
-     
+
    int gt_zero() const;
 
    int ge_zero() const;
@@ -255,7 +253,7 @@ public:
 
    static bool click_bool;
 
-   static ulong constructor_void,
+   static uint32_t constructor_void,
                 constructor_Fixpoint,
                 constructor_int,
                 constructor_uint,
@@ -263,27 +261,27 @@ public:
                 constructor_ulint,
                 constructor_double;
 
-   static ulong ass_Fixpoint,
+   static uint32_t ass_Fixpoint,
                 ass_int,
                 ass_uint,
                 ass_lint,
                 ass_ulint,
                 ass_double;
 
-   static ulong binary_add,
+   static uint32_t binary_add,
                 binary_sub,
                 binary_mul,
                 binary_div;
 
-   static ulong add_eq,
+   static uint32_t add_eq,
                 sub_eq,
                 mul_eq,
                 div_eq;
 
-   static ulong unary_minus,
+   static uint32_t unary_minus,
                 unary_plus ;
 
-   static ulong cond_l,
+   static uint32_t cond_l,
                 cond_g,
                 cond_le,
                 cond_ge,
@@ -293,7 +291,7 @@ public:
    static void  report_on( void ) { click_bool = 1; }
    static void report_off( void ) { click_bool = 0; }
 
-   static void report( ostream& );
+   static void report( std::ostream& );
    static void report( void );
    static void reset_report( void );
 
@@ -305,8 +303,8 @@ public:
 // Constructors
 // ============
 
-inline ulong Fixpoint::bits( void ) { return (ulong)val; }
-inline void Fixpoint::setbits( ulong ul ) { val = ul; }
+inline uint32_t Fixpoint::bits( void ) { return (uint32_t)val; }
+inline void Fixpoint::setbits( uint32_t ul ) { val = ul; }
 
 inline Fixpoint::Fixpoint()
 { CLICK( constructor_void ); }                      // Hey, why not define our own....
@@ -437,16 +435,16 @@ inline Fixpoint& Fixpoint::operator>>=(unsigned int n)
 
 
 
-inline Fixpoint& operator+(const Fixpoint& a, const Fixpoint& b)
+inline Fixpoint operator+(const Fixpoint& a, const Fixpoint& b)
 {
 //  CLICK (Fixpoint::binary_add);
-   
+
    Fixpoint	c;
    c.val = a.val + b.val;
    return c;
 }
 
-inline Fixpoint& operator-(const Fixpoint& a, const Fixpoint& b)
+inline Fixpoint operator-(const Fixpoint& a, const Fixpoint& b)
 {
 //  CLICK (Fixpoint::binary_sub);
    Fixpoint	c;
@@ -454,7 +452,7 @@ inline Fixpoint& operator-(const Fixpoint& a, const Fixpoint& b)
    return c;
 }
 
-inline Fixpoint& operator*(const Fixpoint& a, const Fixpoint& b)
+inline Fixpoint operator*(const Fixpoint& a, const Fixpoint& b)
 {
 //  CLICK (Fixpoint::binary_mul);
    Fixpoint	c;
@@ -462,7 +460,7 @@ inline Fixpoint& operator*(const Fixpoint& a, const Fixpoint& b)
    return c;
 }
 
-inline Fixpoint& operator/(const Fixpoint& a, const Fixpoint& b)
+inline Fixpoint operator/(const Fixpoint& a, const Fixpoint& b)
 {
 //  CLICK (Fixpoint::binary_div);
 //   a.val=_fix_do_div(a.val,b.val);
@@ -551,7 +549,7 @@ inline fixang Fixpoint::to_fixang( void ) const
    // for temp, 360 degrees = 1.0.
    // The lower 16 bits of the internal rep is the fixang.
 
-   return (ushort)temp.val;
+   return (uint16_t)temp.val;
 }
 
 
@@ -667,7 +665,7 @@ inline int Fixpoint::operator!= ( const Fixpoint & fp2 ) const
 //
 // Comparisons with zero
 //
-// ====================================== 
+// ======================================
 
 inline int Fixpoint::gt_zero() const
 {  return (val>0);
@@ -710,7 +708,7 @@ inline Fixpoint operator* ( unsigned int i, Fixpoint fp ) { return Fixpoint(i) *
 inline Fixpoint operator* ( long int i, Fixpoint fp ) { return Fixpoint(i) * fp ; }
 inline Fixpoint operator* ( unsigned long int i, Fixpoint fp ) { return Fixpoint(i) * fp ; }
 //inline Fixpoint operator* ( double d, Fixpoint fp ) { return Fixpoint(d) * fp ; }
-inline Fixpoint& operator* (const double& d, const Fixpoint& fp)
+inline Fixpoint operator* (const double& d, const Fixpoint& fp)
 {
 	Fixpoint c;
 	c.val = fix_mul((long int)(d * SHIFTMULTIPLIER), fp.val);
@@ -722,31 +720,31 @@ inline Fixpoint& operator* (const double& d, const Fixpoint& fp)
 //inline Fixpoint operator- ( long int i, Fixpoint fp ) { return Fixpoint(i) - fp ; }
 //inline Fixpoint operator- ( unsigned long int i, Fixpoint fp ) { return Fixpoint(i) - fp ; }
 //inline Fixpoint operator- ( double d, Fixpoint fp ) { return Fixpoint(d) - fp ; }
-inline Fixpoint& operator- ( const int& i, const Fixpoint& fp )
+inline Fixpoint operator- ( const int& i, const Fixpoint& fp )
 {
 	Fixpoint c;
 	c.val = (i << SHIFTUP) - fp.val;
 	return c;
 }
-inline Fixpoint& operator- ( const unsigned int& i, const Fixpoint& fp )
+inline Fixpoint operator- ( const unsigned int& i, const Fixpoint& fp )
 {
 	Fixpoint c;
 	c.val = (i << SHIFTUP) - fp.val;
 	return c;
 }
-inline Fixpoint& operator- ( const long int& i, const Fixpoint& fp )
+inline Fixpoint operator- ( const long int& i, const Fixpoint& fp )
 {
 	Fixpoint c;
 	c.val = (i << SHIFTUP) - fp.val;
 	return c;
 }
-inline Fixpoint& operator- ( const unsigned long int& i, const Fixpoint& fp )
+inline Fixpoint operator- ( const unsigned long int& i, const Fixpoint& fp )
 {
 	Fixpoint c;
 	c.val = (i << SHIFTUP) - fp.val;
 	return c;
 }
-inline Fixpoint& operator- (const double& d, const Fixpoint& fp)
+inline Fixpoint operator- (const double& d, const Fixpoint& fp)
 {
 	Fixpoint c;
 	c.val = (long int)(d * SHIFTMULTIPLIER) - fp.val;
@@ -799,7 +797,7 @@ inline Fixpoint operator*= ( double d, Fixpoint fp ) { return Fixpoint(d) *= fp 
 // ======================================
 
 
-inline ostream& operator << ( ostream & os, const Fixpoint &fp )
+inline std::ostream& operator << ( std::ostream & os, const Fixpoint &fp )
 {
    os << fp.to_double();
 
@@ -807,7 +805,7 @@ inline ostream& operator << ( ostream & os, const Fixpoint &fp )
 }
 
 
-inline istream& operator >> ( istream & is, Fixpoint &fp )
+inline std::istream& operator >> ( std::istream & is, Fixpoint &fp )
 {
    double temp;
 
