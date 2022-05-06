@@ -2,6 +2,7 @@
 
 extern MunitTest fix_tests[];
 extern MunitTest fix24_tests[];
+extern MunitTest rnd_tests[];
 
 static MunitSuite extern_suites[] = {
 	{	.prefix = "/fix",
@@ -12,6 +13,12 @@ static MunitSuite extern_suites[] = {
 	},
 	{	.prefix = "/fix24",
 		.tests = fix24_tests,
+		.suites = NULL,
+		.iterations = 1,
+		.options = MUNIT_SUITE_OPTION_NONE
+	},
+	{	.prefix = "/random",
+		.tests = rnd_tests,
 		.suites = NULL,
 		.iterations = 1,
 		.options = MUNIT_SUITE_OPTION_NONE
