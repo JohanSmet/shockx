@@ -77,7 +77,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lg_types.h"
 #include <malloc.h>
 
-/*
 //	Setting, pushing, & popping allocator sets
 
 void MemSetAllocator(void *(*fm)(size_t size),
@@ -136,6 +135,7 @@ void MemUnlockHeap();
 #define ReallocPrev(p,size) (memIndexAllocStack >= 0 ? (*memAllocStack[memIndexAllocStack-1].func_realloc)(p,size) : NULL)
 #define FreePrev(p) (if (memIndexAllocStack >= 0) (*memAllocStack[memIndexAllocStack-1].func_free)(p))
 
+/*
 //	Allocating conventional memory
 //	Caveat: since Malloc() can grab conventional memory, necessary
 //	conventional memory blocks should be grabbed early in program.
