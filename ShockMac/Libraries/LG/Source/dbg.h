@@ -109,6 +109,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 */
 
+#ifndef LG_DBG_H
+#define LG_DBG_H
+
 typedef enum {
 	LOG_ERROR	= 0,
 	LOG_WARNING = 1,
@@ -375,3 +378,5 @@ void PrintExitMsg();						// prints exit message
 #define SetExitMsg(str) pExitMsg=str
 extern char *pExitMsg;
 */
+
+#endif // LG_DBG_H
