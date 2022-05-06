@@ -86,3 +86,15 @@ target_sources(${TARGET_LIB_RES} PRIVATE
 	${DIR_LIB_RES}/restypes.h
 )
 target_link_libraries(${TARGET_LIB_RES} PUBLIC ${TARGET_LIB_LG})
+
+# RND
+set (TARGET_LIB_RND rnd)
+set (DIR_LIB_RND ${DIR_LIB}/RND/Source)
+
+add_library(${TARGET_LIB_RND} STATIC)
+target_sources(${TARGET_LIB_RND} PRIVATE
+	${DIR_LIB_RND}/rnd.c
+	${DIR_LIB_RND}/rnd.h
+)
+target_link_libraries(${TARGET_LIB_RND} PUBLIC ${TARGET_LIB_LG})
+target_include_directories(${TARGET_LIB_RND} PUBLIC ${DIR_LIB_RND})
