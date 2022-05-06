@@ -53,7 +53,7 @@ add_library(${TARGET_LIB_LG} STATIC)
 target_sources(${TARGET_LIB_LG} PRIVATE
 	${DIR_LIB_LG}/dbg.c
 	${DIR_LIB_LG}/dbg.h
-	${DIR_LIB_LG}/LG.h
+	${DIR_LIB_LG}/lg.h
 	${DIR_LIB_LG}/lgsprntf.c
 	${DIR_LIB_LG}/lgsprntf.h
 	${DIR_LIB_LG}/memall.c
