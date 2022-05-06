@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		ResMake.c		Resource making
 //		Rex E. Bradford
@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Revision 1.2  1994/06/16  11:08:04  rex
  * Modified LRU list handling, lock resource made with ResMake() instead of
  * setting RDF_NODROP flag
- * 
+ *
  * Revision 1.1  1994/02/17  11:23:57  rex
  * Initial revision
- * 
+ *
 */
 
 #include <string.h>
@@ -49,66 +49,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //	--------------------------------------------------------
 //  For Mac version, use Resource Manager to add the resource to indicated res file.
 
-void ResMake(Id id, void *ptr, long size, uchar type, short filenum, uchar flags)
+void ResMake(Id id, void *ptr, int32_t size, uint8_t type, int32_t filenum, uint8_t flags)
 {
-	Handle		resHdl;
 	ResDesc 	*prd;
-	Str255		resName;
-	
+	ResDesc2	*prd2;
+
+	ResExtendDesc(id);								//	Extend res desc table if need to
+
 	// Check for resource at that id.  If the handle exists, then just change the
 	// handle (adjusting for size if needed, of course).
-
 	prd = RESDESC(id);
-	if (prd->hdl)
-	{
-		ResLoadResource(id);
-		if (GetHandleSize(prd->hdl) != size)
-		{
-			SetHandleSize(prd->hdl, size);
-		}
-		BlockMoveData(ptr, *prd->hdl, size);
-	}
-	else
-	{
-		// Make a handle out of the data and add the resource.
+	prd2 = RESDESC2(id);
 
-		UseResFile(filenum);							// Use the res file indicated.
-	
-		PtrToHand(ptr, &resHdl, size);			// Turn the pointer into a handle.
-		
-		resName[0] = 1;
-		if ((flags & RDF_LZW) == 0)				// Figure out the resource name.
-		{
-			if (flags & RDF_COMPOUND)
-				resName[1] = 'c';
-			else
-				resName[1] = 'n';
-		}
-		else
-		{
-			if (flags & RDF_COMPOUND)
-				resName[1] = 'x';
-			else
-				resName[1] = 'z';
-		}
-		AddResource(resHdl, resMacTypes[type], id, resName);
-		if (ResError())
-			DebugStr("\pResMake: Can't add a resource.\n");
-	
-		ResExtendDesc(id);								//	Extend res desc table if need to
-	
-	//	Spew(DSRC_RES_Make, ("ResMake: making resource $%x\n", id));
-	
-		//	Add us to the soup, set lock so doesn't get swapped out
-	
-		prd->hdl = resHdl;
-		prd->filenum = filenum;
-		prd->lock = 1;
-		prd->flags = flags;
-		prd->type = type;
+	if (prd->offset) {
+		ResDelete(id);
 	}
+
+	//	Spew(DSRC_RES_Make, ("ResMake: making resource $%x\n", id));
+
+	//	Add us to the soup, set lock so doesn't get swapped out
+	prd->ptr = ptr;
+	prd->lock = 1;
+	prd->size = size;
+	prd->filenum = filenum;
+	prd->offset = RES_OFFSET_PENDING;
+
+	prd2->flags = flags;
+	prd2->type = type;
 }
 
+#if 0
 
 //	---------------------------------------------------------------
 //
@@ -179,7 +149,7 @@ void ResAddRef(Ref ref, void *pitem, long itemSize)
 		prt = (RefTable *)*prd->hdl;
 	}
 	hdlSize = GetHandleSize(prd->hdl);
-	
+
 	//	If index within current range of compound resource, replace or insert
 
 	index = REFINDEX(ref);
@@ -225,7 +195,7 @@ void ResAddRef(Ref ref, void *pitem, long itemSize)
 			SetHandleSize(prd->hdl, hdlSize);
 			HLock(prd->hdl);
 			prt = (RefTable *)*prd->hdl;
-			
+
 			LG_memmove(REFPTR(prt, index + 1) + sizeDiff, REFPTR(prt, index + 1),
 				prt->offset[prt->numRefs] - prt->offset[index + 1]);
 			for (i = index + 1; i <= prt->numRefs; i++)
@@ -268,10 +238,11 @@ void ResAddRef(Ref ref, void *pitem, long itemSize)
 		LG_memcpy(REFPTR(prt,index), pitem, itemSize);
 		prt->numRefs = index + 1;
 	}
-	
+
 	HUnlock(prd->hdl);
 }
 
+#endif
 
 //	-------------------------------------------------------------
 //
@@ -283,19 +254,11 @@ void ResAddRef(Ref ref, void *pitem, long itemSize)
 //
 //		id = id of resource to unmake
 //	--------------------------------------------------------
-//  For Mac version: use ReleaseResource to free the handle (the pointer that
-//  the handle was made from will still be around).  
 
 void ResUnmake(Id id)
 {
 	ResDesc *prd;
-
+	// JSXXX: should anything be done to fix up the LRU list?
 	prd = RESDESC(id);
-	if (prd->hdl)
-	{
-		ReleaseResource(prd->hdl);
-//		prd->hdl = NULL;
-//		LG_memset(prd, 0, sizeof(ResDesc));
-	}
+	LG_memset(prd, 0, sizeof(ResDesc));
 }
-

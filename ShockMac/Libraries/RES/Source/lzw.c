@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		LZW.C		New improved super-duper LZW compressor & decompressor
 //		This module by Greg Travis and Rex Bradford
@@ -85,8 +85,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //		User sources supply two functions of the form:
 //
-//		void f_SrcCtrl(long srcLoc, LzwCtrl ctrl);
-//		uchar f_SrcGet();
+//		void f_SrcCtrl(int32_t srcLoc, LzwCtrl ctrl);
+//		uint8_t f_SrcGet();
 //
 //		The control function is used to set up and tear down the Get()
 //		function, which is used to supply the next byte of data.  Before
@@ -100,8 +100,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //		User destinations work similarly.  Again, two functions:
 //
-//		void f_DestCtrl(long destLoc, LzwCtrl ctrl);
-//		void f_DestPut(uchar byte);
+//		void f_DestCtrl(int32_t destLoc, LzwCtrl ctrl);
+//		void f_DestPut(uint8_t byte);
 //
 //		The control function is called with BEGIN and END just like the
 //		source function.  The DestPut() function is called repeatedly to
@@ -115,7 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //		destinations as well, of course.
 
 /*
-* $Header: n:/project/lib/src/res/rcs/lzw.c 1.4 1994/02/17 11:24:13 rex Exp $
+* $Header: r:/prj/lib/src/res/rcs/lzw.c 1.5 1994/09/21 09:34:37 rex Exp $
 * $log$
 */
 
@@ -126,6 +126,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifndef __LZW_H
 #include "lzw.h"
@@ -146,18 +147,18 @@ bool lzwBufferMalloced;				// buffer malloced?
 
 //	Global tables used for compression & expansion
 
-short *lzwCodeValue;					// code value array
-ushort *lzwPrefixCode;				// prefix code array
-uchar *lzwAppendChar;				// appended chars array
-uchar *lzwDecodeStack;				// decoded string
+int16_t *lzwCodeValue;					// code value array
+uint16_t *lzwPrefixCode;				// prefix code array
+uint8_t *lzwAppendChar;				// appended chars array
+uint8_t *lzwDecodeStack;				// decoded string
 
-uchar *lzwFdReadBuff;				// buffer for file descriptor source
-uchar *lzwFdWriteBuff;				// buffer for file descriptor dest
+uint8_t *lzwFdReadBuff;				// buffer for file descriptor source
+uint8_t *lzwFdWriteBuff;				// buffer for file descriptor dest
 
 //	Prototypes of internal routines
 
-int LzwFindMatch(int hash_prefix, unsigned int hash_character);
-uchar *LzwDecodeString(uchar *buffer,unsigned int code);
+int32_t LzwFindMatch(int32_t hash_prefix, uint32_t hash_character);
+uint8_t *LzwDecodeString(uint8_t *buffer, uint32_t code);
 
 //	--------------------------------------------------------
 //		INITIALIZATION AND TERMINATION
@@ -189,13 +190,13 @@ void LzwTerm( void )
 //
 //	Returns: 0 if ok, -1 if buffer not ok
 
-int LzwSetBuffer(void *buff, long buffSize)
+int32_t LzwSetBuffer(void *buff, int32_t buffSize)
 {
 //	Check buffer size
 
 	if (buffSize < LZW_BUFF_SIZE)
 		{
-		Warning(("LzwSetBuffer: buffer too small!\n"));
+//		Warning(("LzwSetBuffer: buffer too small!\n"));
 		return(-1);
 		}
 
@@ -206,12 +207,12 @@ int LzwSetBuffer(void *buff, long buffSize)
 //	Set buffer pointers
 
 	lzwBuffer = buff;
-	lzwDecodeStack = (uchar *)lzwBuffer;
-	lzwFdReadBuff = ((uchar *) lzwDecodeStack) + LZW_DECODE_STACK_SIZE;
-	lzwFdWriteBuff = ((uchar *) lzwFdWriteBuff) + LZW_FD_READ_BUFF_SIZE;
-	lzwCodeValue = (short *) (((uchar *) lzwDecodeStack) + LZW_FD_WRITE_BUFF_SIZE);
-	lzwPrefixCode = (ushort *) (((uchar *) lzwCodeValue) + (LZW_TABLE_SIZE * sizeof(ushort)));
-	lzwAppendChar = ((uchar *) lzwPrefixCode) + (LZW_TABLE_SIZE * sizeof(ushort));
+	lzwDecodeStack = lzwBuffer;
+	lzwFdReadBuff = ((uint8_t *) lzwDecodeStack) + LZW_DECODE_STACK_SIZE;
+	lzwFdWriteBuff = ((uint8_t *) lzwFdWriteBuff) + LZW_FD_READ_BUFF_SIZE;
+	lzwCodeValue = (int16_t *) (((uint8_t *) lzwDecodeStack) + LZW_FD_WRITE_BUFF_SIZE);
+	lzwPrefixCode = (uint16_t *) (((uint8_t *) lzwCodeValue) + (LZW_TABLE_SIZE * sizeof(uint16_t)));
+	lzwAppendChar = ((uint8_t *) lzwPrefixCode) + (LZW_TABLE_SIZE * sizeof(uint16_t));
 	lzwBufferMalloced = FALSE;
 	return(0);
 }
@@ -222,17 +223,16 @@ int LzwSetBuffer(void *buff, long buffSize)
 //
 //	Returns: 0 if success, -1 if error.
 
-int LzwMallocBuffer()
+int32_t LzwMallocBuffer()
 {
 	void *buff;
 
 	if ((lzwBuffer == NULL) || (!lzwBufferMalloced))
 		{
-//		buff = Malloc(LZW_BUFF_SIZE);
-		buff = NewPtr(LZW_BUFF_SIZE);
+		buff = malloc(LZW_BUFF_SIZE);
 		if (buff == NULL)
 			{
-			Warning(("LzwMallocBuffer: failed to allocate buffers\n"));
+//			Warning(("LzwMallocBuffer: failed to allocate buffers\n"));
 			return(-1);
 			}
 		else
@@ -252,8 +252,7 @@ void LzwFreeBuffer()
 {
 	if (lzwBufferMalloced)
 		{
-//		Free(lzwBuffer);
-		DisposePtr((Ptr)lzwBuffer);
+		free(lzwBuffer);
 		lzwBuffer = NULL;
 		lzwBufferMalloced = FALSE;
 		}
@@ -286,20 +285,20 @@ void LzwFreeBuffer()
 //	size, the source and destination are shut down and -1 is returned.
 
 typedef struct {
-	unsigned int next_code;		// next available string code
-	unsigned int character;		// current character read from source
-	unsigned int string_code;	// current string compress code
-	unsigned int index;			// index into string table
-	long lzwInputCharCount;		// input character count
-	long lzwOutputSize;			// current size of output
-	int lzwOutputBitCount;		// current bit location in output
-	ulong lzwOutputBitBuffer;	// 32-bit buffer holding output bits
+	uint32_t next_code;		// next available string code
+	uint32_t character;		// current character read from source
+	uint32_t string_code;	// current string compress code
+	uint32_t index;			// index into string table
+	int32_t lzwInputCharCount;		// input character count
+	int32_t lzwOutputSize;			// current size of output
+	int32_t lzwOutputBitCount;		// current bit location in output
+	uint32_t lzwOutputBitBuffer;	// 32-bit buffer holding output bits
 } LzwC;
 
 LzwC lzwc;		// current compress state
 
 #define LzwOutputCode(code) { \
-	lzwc.lzwOutputBitBuffer |= ((ulong) code) << (32-LZW_BITS-lzwc.lzwOutputBitCount); \
+	lzwc.lzwOutputBitBuffer |= ((uint32_t) code) << (32-LZW_BITS-lzwc.lzwOutputBitCount); \
 	lzwc.lzwOutputBitCount += LZW_BITS; \
 	while (lzwc.lzwOutputBitCount >= 8) \
 		{ \
@@ -315,15 +314,15 @@ LzwC lzwc;		// current compress state
 		} \
 }
 
-long LzwCompress(
-	void (*f_SrcCtrl)(long srcLoc, LzwCtrl ctrl),	// func to control source
-	uchar (*f_SrcGet)(),						// func to get bytes from source
-	long srcLoc,								// source "location" (ptr, FILE *, etc.)
-	long srcSize,								// size of source in bytes
-	void (*f_DestCtrl)(long destLoc, LzwCtrl ctrl),	// func to control dest
-	void (*f_DestPut)(uchar byte),		// func to put bytes to dest
-	long destLoc,								// dest "location" (ptr, FILE *, etc.)
-	long destSizeMax							// max size of dest (or LZW_MAXSIZE)
+int32_t LzwCompress(
+	void (*f_SrcCtrl)(intptr_t srcLoc, LzwCtrl ctrl),	// func to control source
+	uint8_t (*f_SrcGet)(),						// func to get bytes from source
+	int32_t srcLoc,								// source "location" (ptr, FILE *, etc.)
+	int32_t srcSize,								// size of source in bytes
+	void (*f_DestCtrl)(intptr_t destLoc, LzwCtrl ctrl),	// func to control dest
+	void (*f_DestPut)(uint8_t byte),		// func to put bytes to dest
+	int32_t destLoc,								// dest "location" (ptr, FILE *, etc.)
+	int32_t destSizeMax							// max size of dest (or LZW_MAXSIZE)
 )
 {
 
@@ -338,7 +337,7 @@ long LzwCompress(
 //	Set up for compress loop
 
 	lzwc.next_code = 256;             // skip over real 256 char values
-	LG_memset(lzwCodeValue, -1, sizeof(short) * LZW_TABLE_SIZE);
+	memset(lzwCodeValue, -1, sizeof(int16_t) * LZW_TABLE_SIZE);
 
 	lzwc.lzwOutputSize = 0;
 	lzwc.lzwOutputBitCount = 0;
@@ -389,7 +388,7 @@ long LzwCompress(
 				{
 				LzwOutputCode(lzwc.string_code);
 				LzwOutputCode(FLUSH_CODE);
-				LG_memset(lzwCodeValue, -1, sizeof(short) * LZW_TABLE_SIZE);
+				memset(lzwCodeValue, -1, sizeof(int16_t) * LZW_TABLE_SIZE);
 			   lzwc.string_code = lzwc.character;
 				lzwc.next_code = 256;
 				}
@@ -441,28 +440,28 @@ long LzwCompress(
 //	Returns: # bytes in uncompressed output
 
 typedef struct {
-	int lzwInputBitCount;
-	ulong lzwInputBitBuffer;
-	unsigned int next_code;		// next available string code
-	unsigned int new_code;		// next code from source
-	unsigned int old_code;		// last code gotten from source
-	unsigned int character;		// current char for string stack
-	uchar *string;					// used to output string in reverse order
-	long outputSize;				// size of uncompressed data
-	long destSkip;					// # bytes to skip over
-	long destSize;					// destination size
+	int32_t lzwInputBitCount;
+	uint32_t lzwInputBitBuffer;
+	uint32_t next_code;		// next available string code
+	uint32_t new_code;		// next code from source
+	uint32_t old_code;		// last code gotten from source
+	uint32_t character;		// current char for string stack
+	uint8_t *string;					// used to output string in reverse order
+	int32_t outputSize;				// size of uncompressed data
+	int32_t destSkip;					// # bytes to skip over
+	int32_t destSize;					// destination size
 } LzwE;
 
 LzwE lzwe;		// current expand state
 
 
-static unsigned int LzwInputCode(uchar (*f_SrcGet)())
+static uint32_t LzwInputCode(uint8_t (*f_SrcGet)())
 {
-	unsigned int return_value;
+	uint32_t return_value;
 
 	while (lzwe.lzwInputBitCount <= 24)
 		{
-		lzwe.lzwInputBitBuffer |= ((ulong) (*f_SrcGet)()) << (24 - lzwe.lzwInputBitCount);
+		lzwe.lzwInputBitBuffer |= ((uint32_t) (*f_SrcGet)()) << (24 - lzwe.lzwInputBitCount);
 		lzwe.lzwInputBitCount += 8;
 		}
 	return_value = lzwe.lzwInputBitBuffer >> (32 - LZW_BITS);
@@ -474,15 +473,15 @@ static unsigned int LzwInputCode(uchar (*f_SrcGet)())
 }
 
 
-long LzwExpand(
-	void (*f_SrcCtrl)(long srcLoc, LzwCtrl ctrl),	// func to control source
-	uchar (*f_SrcGet)(),						// func to get bytes from source
-	long srcLoc,								// source "location" (ptr, FILE *, etc.)
-	void (*f_DestCtrl)(long destLoc, LzwCtrl ctrl),	// func to control dest
-	void (*f_DestPut)(uchar byte),		// func to put bytes to dest
-	long destLoc,								// dest "location" (ptr, FILE *, etc.)
-	long destSkip,								// # dest bytes to skip over (or 0)
-	long destSize								// # dest bytes to capture (if 0, all)
+int32_t LzwExpand(
+	void (*f_SrcCtrl)(intptr_t srcLoc, LzwCtrl ctrl),	// func to control source
+	uint8_t (*f_SrcGet)(),						// func to get bytes from source
+	int32_t srcLoc,								// source "location" (ptr, FILE *, etc.)
+	void (*f_DestCtrl)(intptr_t destLoc, LzwCtrl ctrl),	// func to control dest
+	void (*f_DestPut)(uint8_t byte),		// func to put bytes to dest
+	int32_t destLoc,								// dest "location" (ptr, FILE *, etc.)
+	int32_t destSkip,								// # dest bytes to skip over (or 0)
+	int32_t destSize								// # dest bytes to capture (if 0, all)
 )
 {
 
@@ -599,29 +598,28 @@ DONE_EXPAND:
 //	LzwBuffSrcCtrl() and LzwBuffSrcGet() implement a memory buffer
 //	source for lzw compression and expansion.
 
-static uchar *lzwBuffSrcPtr;
+static uint8_t *lzwBuffSrcPtr;
 
-void LzwBuffSrcCtrl(long srcLoc, LzwCtrl ctrl)
+void LzwBuffSrcCtrl(intptr_t srcLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
-		lzwBuffSrcPtr = (uchar *) srcLoc;
+		lzwBuffSrcPtr = (uint8_t *) srcLoc;
 }
 
-uchar LzwBuffSrcGet()
+uint8_t LzwBuffSrcGet()
 {
 	return(*lzwBuffSrcPtr++);
 }
 
-/*
 //	---------------------------------------------------------------
 //
 //	LzwFdSrcCtrl() and LzwFdSrcGet() implement a file-descriptor
 //	source (fd = open()) for lzw compression and expansion.
 
-static int lzwFdSrc;
-static int lzwReadBuffIndex;
+static int32_t lzwFdSrc;
+static int32_t lzwReadBuffIndex;
 
-void LzwFdSrcCtrl(long srcLoc, LzwCtrl ctrl)
+void LzwFdSrcCtrl(intptr_t srcLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
 		{
@@ -630,7 +628,7 @@ void LzwFdSrcCtrl(long srcLoc, LzwCtrl ctrl)
 		}
 }
 
-uchar LzwFdSrcGet()
+uint8_t LzwFdSrcGet()
 {
 	if (lzwReadBuffIndex == LZW_FD_READ_BUFF_SIZE)
 		{
@@ -647,17 +645,16 @@ uchar LzwFdSrcGet()
 
 static FILE *lzwFpSrc;
 
-void LzwFpSrcCtrl(long srcLoc, LzwCtrl ctrl)
+void LzwFpSrcCtrl(intptr_t srcLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
 		lzwFpSrc = (FILE *) srcLoc;
 }
 
-uchar LzwFpSrcGet()
+uint8_t LzwFpSrcGet()
 {
 	return(fgetc(lzwFpSrc));
 }
-*/
 
 //	---------------------------------------------------------------
 //		STANDARD OUTPUT SOURCES
@@ -666,29 +663,28 @@ uchar LzwFpSrcGet()
 //	LzwBuffDestCtrl() and LzwBuffDestPut() implement a memory
 //	buffer destination for lzw compression and expansion.
 
-static uchar *lzwBuffDestPtr;
+static uint8_t *lzwBuffDestPtr;
 
-void LzwBuffDestCtrl(long destLoc, LzwCtrl ctrl)
+void LzwBuffDestCtrl(intptr_t destLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
-		lzwBuffDestPtr = (uchar *) destLoc;
+		lzwBuffDestPtr = (uint8_t *) destLoc;
 }
 
-void LzwBuffDestPut(uchar byte)
+void LzwBuffDestPut(uint8_t byte)
 {
 	*lzwBuffDestPtr++ = byte;
 }
 
-/*
 //	---------------------------------------------------------------
 //
 //	LzwFdDestCtrl() and LzwFdDestPut() implement a file-descriptor
 //	destination (fd = open()) for lzw compression and expansion.
 
-static int lzwFdDest;
-static int lzwWriteBuffIndex;
+static intptr_t lzwFdDest;
+static int32_t lzwWriteBuffIndex;
 
-void LzwFdDestCtrl(long destLoc, LzwCtrl ctrl)
+void LzwFdDestCtrl(intptr_t destLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
 		{
@@ -702,7 +698,7 @@ void LzwFdDestCtrl(long destLoc, LzwCtrl ctrl)
 		}
 }
 
-void LzwFdDestPut(uchar byte)
+void LzwFdDestPut(uint8_t byte)
 {
 	lzwFdWriteBuff[lzwWriteBuffIndex++] = byte;
 	if (lzwWriteBuffIndex == LZW_FD_WRITE_BUFF_SIZE)
@@ -719,17 +715,16 @@ void LzwFdDestPut(uchar byte)
 
 static FILE *lzwFpDest;
 
-void LzwFpDestCtrl(long destLoc, LzwCtrl ctrl)
+void LzwFpDestCtrl(intptr_t destLoc, LzwCtrl ctrl)
 {
 	if (ctrl == BEGIN)
 		lzwFpDest = (FILE *) destLoc;
 }
 
-void LzwFpDestPut(uchar byte)
+void LzwFpDestPut(uint8_t byte)
 {
 	fputc(byte, lzwFpDest);
 }
-*/
 
 //	---------------------------------------------------------------
 //
@@ -737,17 +732,13 @@ void LzwFpDestPut(uchar byte)
 //	destination for lzw compression and expansion.  Used to size
 //	results of compression or expansion.
 
-//#pragma off(unreferenced);
-
-void LzwNullDestCtrl(long /*destLoc*/, LzwCtrl /*ctrl*/)
+void LzwNullDestCtrl(intptr_t destLoc, LzwCtrl ctrl)
 {
 }
 
-void LzwNullDestPut(uchar /*byte*/)
+void LzwNullDestPut(uint8_t byte)
 {
 }
-
-//#pragma on(unreferenced);
 
 //	-----------------------------------------------------------
 //		INTERNAL ROUTINES - COMPRESSION
@@ -763,10 +754,10 @@ void LzwNullDestPut(uchar /*byte*/)
 //
 //	Returns: string table index
 
-int LzwFindMatch(int hash_prefix, unsigned int hash_character)
+int32_t LzwFindMatch(int32_t hash_prefix, uint32_t hash_character)
 {
-	int index;
-	int offset;
+	int32_t index;
+	int32_t offset;
 
 	index = (hash_character << HASHING_SHIFT) ^ hash_prefix;
 	if (index == 0)
@@ -794,20 +785,24 @@ int LzwFindMatch(int hash_prefix, unsigned int hash_character)
 //	storing it in a buffer.  The buffer can then be output in
 //	reverse order by the expansion program.
 
-uchar *LzwDecodeString(uchar *buffer, unsigned int code)
+uint8_t *LzwDecodeString(uint8_t *buffer, uint32_t code)
 {
-	int i;
+#ifdef DBG_ON
+	int32_t i = 0;
+#endif
 
-	i=0;
 	while (code > 255)
 		{
 		*buffer++ = lzwAppendChar[code];
 		code = lzwPrefixCode[code];
 
+#ifdef DBG_ON
 		if (i++ >= 4094)
 			Warning(("LzwDecodeString: Fatal error during code expansion\n"));
+#endif
 		}
 
 	*buffer = code;
 	return(buffer);
 }
+

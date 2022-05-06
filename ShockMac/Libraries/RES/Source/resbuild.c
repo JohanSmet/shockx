@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		RESBUILD.C		Resource-file building routines
 //		Rex E. Bradford (REX)
@@ -23,10 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * $Log: resbuild.c $
  * Revision 1.10  1994/06/16  11:06:30  rex
  * Got rid of RDF_NODROP flag
- * 
+ *
  * Revision 1.9  1994/02/17  11:25:32  rex
  * Moved some stuff out to resmake.c and resfile.c
- * 
+ *
 */
 
 //#include <io.h>
@@ -38,13 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lzw.h"
 //#include <_res.h>
 
-/*
 #define CTRL_Z 26		// make sure comment ends with one, so can type a file
 
 //	Internal prototypes
 
 bool ResEraseIfInFile(Id id);				// erase item from file
-*/
 
 //	-------------------------------------------------------
 //
@@ -53,24 +51,22 @@ bool ResEraseIfInFile(Id id);				// erase item from file
 //	For Mac version:  Does nothing.  May go back later and add comment via the
 // desktop database, maybe.
 
-void ResSetComment(int /*filenum*/, char* /*comment*/)
+void ResSetComment(int filenum, char* comment)
 {
-/*
 	ResFileHeader *phead;
 
-	DBG(DSRC_RES_ChkIdRef, {if (resFile[filenum].pedit == NULL) { \
+	//DBG(DSRC_RES_ChkIdRef, {if (resFile[filenum].pedit == NULL) { \
 		Warning(("ResSetComment: file %d not open for writing\n", filenum)); \
 		return;}});
 
-	Spew(DSRC_RES_General,
-		("ResSetComment: setting comment for filenum %d to:\n%s\n",
-		filenum, comment));
+	//Spew(DSRC_RES_General,
+	//	("ResSetComment: setting comment for filenum %d to:\n%s\n",
+	//	filenum, comment));
 
 	phead = &resFile[filenum].pedit->hdr;
 	memset(phead->comment, 0, sizeof(phead->comment));
 	strncpy(phead->comment, comment, sizeof(phead->comment) - 2);
 	phead->comment[strlen(phead->comment)] = CTRL_Z;
-*/
 }
 
 //	-------------------------------------------------------
@@ -83,20 +79,21 @@ void ResSetComment(int /*filenum*/, char* /*comment*/)
 //
 //		id = id to write
 //	-------------------------------------------------------
-//	For Mac version:  This is why we're using the Mac Resource Mgr. 
+//	For Mac version:  This is why we're using the Mac Resource Mgr.
 //	Simply get the resource handle and write it out.  If resource is compressed,
 // do that first before writing.
 #define EXTRA 250
 
 int ResWrite(Id id)
 {
+#if 0
 	ResDesc 	*prd;
 	long 			compsize = -1;
 	long 			size = 0;
 	long 			sizeTable = 0;
 	Handle		compHdl = NULL;
 	Ptr			srcPtr, compPtr;
-	
+
 	prd = RESDESC(id);
 	if (prd->hdl)
 	{
@@ -123,13 +120,13 @@ int ResWrite(Id id)
 					srcPtr += sizeTable;
 					compPtr += sizeTable;
 				}
-				
+
 				if (size > 0)											// Compress it!
 					compsize = LzwCompressBuff2Buff(srcPtr, size, compPtr, size);
 
 				HUnlock(compHdl);
 				HUnlock(prd->hdl);
-	
+
 				if (compsize > 0)												// If compressed okay, then
 				{
 					SetHandleSize(prd->hdl, compsize+sizeTable);	// set resource handle to the compressed size,
@@ -142,7 +139,7 @@ int ResWrite(Id id)
 				}
 			}
 		}
-				
+
 		// Now write out the changed resource.
 		ChangedResource(prd->hdl);
 		WriteResource(prd->hdl);
@@ -151,12 +148,14 @@ int ResWrite(Id id)
 	}
 	else
 		return (-1);
-/*
-static uchar pad[] = {0,0,0,0,0,0,0,0};
+#endif
+
+	static uint8_t pad[] = {0,0,0,0,0,0,0,0};
 	ResDesc *prd;
+	ResDesc2 *prd2;
 	ResFile *prf;
 	ResDirEntry *pDirEntry;
-	uchar *p;
+	uint8_t *p;
 	long size,sizeTable;
 	void *pcompbuff;
 	long compsize;
@@ -164,12 +163,13 @@ static uchar pad[] = {0,0,0,0,0,0,0,0};
 
 //	Check for errors
 
-	DBG(DSRC_RES_ChkIdRef, {if (!ResCheckId(id)) return;});
+	// DBG(DSRC_RES_ChkIdRef, {if (!ResCheckId(id)) return;});
 
 	prd = RESDESC(id);
+	prd2 = RESDESC2(id);
 	prf = &resFile[prd->filenum];
 
-	DBG(DSRC_RES_Write, {if (prf->pedit == NULL) { \
+	// DBG(DSRC_RES_Write, {if (prf->pedit == NULL) { \
 		Warning(("ResWrite: file %d not open for writing\n", prd->filenum)); \
 		return;}});
 
@@ -180,86 +180,82 @@ static uchar pad[] = {0,0,0,0,0,0,0,0};
 //	If directory full, grow it
 
 	if (prf->pedit->pdir->numEntries == prf->pedit->numAllocDir)
-		{
-		Spew(DSRC_RES_Write, ("ResWrite: growing directory of filenum %d\n",
-			prd->filenum));
+	{
+		// Spew(DSRC_RES_Write, ("ResWrite: growing directory of filenum %d\n",
+		//	prd->filenum));
 
 		prf->pedit->numAllocDir += DEFAULT_RES_GROWDIRENTRIES;
-		prf->pedit->pdir = Realloc(prf->pedit->pdir,
+		prf->pedit->pdir = realloc(prf->pedit->pdir,
 			sizeof(ResDirHeader) + (sizeof(ResDirEntry) * prf->pedit->numAllocDir));
-		}
+	}
 
 //	Set resource's file offset
-
 	prd->offset = RES_OFFSET_REAL2DESC(prf->pedit->currDataOffset);
 
 //	Fill in directory entry
-
 	pDirEntry = ((ResDirEntry *) (prf->pedit->pdir + 1)) +
 		prf->pedit->pdir->numEntries;
 
 	pDirEntry->id = id;
-	pDirEntry->flags = prd->flags;
-	pDirEntry->type = prd->type;
+	pDirEntry->flags = prd2->flags;
+	pDirEntry->type = prd2->type;
 	pDirEntry->size = prd->size;
 
-	Spew(DSRC_RES_Write, ("ResWrite: writing $%x\n", id));
+	// Spew(DSRC_RES_Write, ("ResWrite: writing $%x\n", id));
 
 //	If compound, write out reftable without compression
 
-	lseek(prf->fd, prf->pedit->currDataOffset, SEEK_SET);
+	fseek(prf->fd, prf->pedit->currDataOffset, SEEK_SET);
 	p = prd->ptr;
 	sizeTable = 0;
 	size = prd->size;
-	if (prd->flags & RDF_COMPOUND)
-		{
+	if (prd2->flags & RDF_COMPOUND)
+	{
 		sizeTable = REFTABLESIZE(((RefTable *) p)->numRefs);
-		write(prf->fd, p, sizeTable);
+		fwrite(p, sizeTable, 1, prf->fd);
 		p += sizeTable;
 		size -= sizeTable;
-		}
+	}
 
 //	If compression, try it (may not work out)
-
 	if (pDirEntry->flags & RDF_LZW)
-		{
-		pcompbuff = Malloc(size + EXTRA);
+	{
+		pcompbuff = malloc(size + EXTRA);
 		compsize = LzwCompressBuff2Buff(p, size, pcompbuff, size);
 		if (compsize < 0)
-			{
+		{
 			pDirEntry->flags &= ~RDF_LZW;
-			}
-		else
-			{
-			pDirEntry->csize = sizeTable + compsize;
-			write(prf->fd, pcompbuff, compsize);
-			}
-		Free(pcompbuff);
 		}
+		else
+		{
+			pDirEntry->csize = sizeTable + compsize;
+			fwrite(pcompbuff, compsize, 1, prf->fd);
+		}
+		free(pcompbuff);
+	}
 
 //	If no compress (or failed to compress well), just write out
 
 	if (!(pDirEntry->flags & RDF_LZW))
-		{
+	{
 		pDirEntry->csize = prd->size;
-		write(prf->fd, p, size);
-		}
+		fwrite(p, size, 1, prf->fd);
+	}
 
 //	Pad to align on data boundary
-
 	padBytes = RES_OFFSET_PADBYTES(pDirEntry->csize);
 	if (padBytes)
-		write(prf->fd, pad, padBytes);
+		fwrite(pad, padBytes, 1, prf->fd);
 
-if (tell(prf->fd) & 3)
-	Warning(("ResWrite: misaligned writing!\n"));
+	if (ftell(prf->fd) & 3)
+		Warning(("ResWrite: misaligned writing!\n"));
 
 //	Advance dir num entries, current data offset
-
 	prf->pedit->pdir->numEntries++;
 	prf->pedit->currDataOffset =
 		RES_OFFSET_ALIGN(prf->pedit->currDataOffset + pDirEntry->csize);
-*/
+
+	return size;
 }
 
 //	-------------------------------------------------------------
@@ -273,13 +269,14 @@ if (tell(prf->fd) & 3)
 
 void ResKill(Id id)
 {
+#if 0
 	Handle	resHdl;
 	ResDesc *prd = RESDESC(id);
 
 	if (prd->hdl)
 	{
 		resHdl = prd->hdl;
-			
+
 		RmveResource(resHdl);							// RmveResource turns it into a normal handle.
 		DisposeHandle(resHdl);							// that we can dispose of.
 
@@ -288,11 +285,12 @@ void ResKill(Id id)
 	}
 	LG_memset(prd, 0, sizeof(ResDesc));
 
-/*
+#endif
+
 	//	Check for valid id
 
-	DBG(DSRC_RES_ChkIdRef, {if (!ResCheckId(id)) return;});
-	Spew(DSRC_RES_Write, ("ResKill: killing $%x\n", id));
+//	DBG(DSRC_RES_ChkIdRef, {if (!ResCheckId(id)) return;});
+//	Spew(DSRC_RES_Write, ("ResKill: killing $%x\n", id));
 
 	//	Delete it
 
@@ -300,15 +298,13 @@ void ResKill(Id id)
 
 	//	Make sure file is writeable
 
-	prd = RESDESC(id);
-	DBG(DSRC_RES_Write, {if (resFile[prd->filenum].pedit == NULL) { \
+	ResDesc *prd = RESDESC(id);
+	//DBG(DSRC_RES_Write, {if (resFile[prd->filenum].pedit == NULL) { \
 		Warning(("ResKill: file %d not open for writing\n", prd->filenum)); \
 		return;}});
 
 	//	If so, erase it
-
 	ResEraseIfInFile(id);
-*/
 }
 
 /*
@@ -404,7 +400,7 @@ long ResPack(int filenum)
 static void ResCopyBytes(int fd, long writePos, long readPos, long size)
 {
 	long sizeCopy;
-	uchar *buff;
+	uint8_t *buff;
 
 	buff = Malloc(SIZE_RESCOPY);
 

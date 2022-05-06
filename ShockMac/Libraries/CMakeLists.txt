@@ -62,4 +62,27 @@ target_sources(${TARGET_LIB_LG} PRIVATE
 	${DIR_LIB_LG}/tmpalloc.c
 	${DIR_LIB_LG}/tmpalloc.h
 )
+target_include_directories(${TARGET_LIB_LG} PUBLIC ${DIR_LIB_LG})
 target_link_libraries(${TARGET_LIB_LG} PUBLIC ${TARGET_LIB_FIX})
+
+# RES
+set (TARGET_LIB_RES res)
+set (DIR_LIB_RES ${DIR_LIB}/RES/Source)
+
+add_library(${TARGET_LIB_RES} STATIC)
+target_sources(${TARGET_LIB_RES} PRIVATE
+	${DIR_LIB_RES}/lzw.c
+	${DIR_LIB_RES}/lzw.h
+	${DIR_LIB_RES}/refacc.c
+	${DIR_LIB_RES}/resacc.c
+	${DIR_LIB_RES}/resbuild.c
+	${DIR_LIB_RES}/res.c
+	${DIR_LIB_RES}/resfile.c
+	${DIR_LIB_RES}/res.h
+	${DIR_LIB_RES}/res_.h
+	${DIR_LIB_RES}/resload.c
+	${DIR_LIB_RES}/resmake.c
+	${DIR_LIB_RES}/restypes.c
+	${DIR_LIB_RES}/restypes.h
+)
+target_link_libraries(${TARGET_LIB_RES} PUBLIC ${TARGET_LIB_LG})
