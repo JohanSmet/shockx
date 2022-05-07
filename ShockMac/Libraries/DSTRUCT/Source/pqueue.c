@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 /*
  * $Source: n:/project/lib/src/dstruct/RCS/pqueue.c $
@@ -25,14 +25,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * $Log: pqueue.c $
  * Revision 1.1  1993/08/09  20:30:58  mahk
  * Initial revision
- * 
+ *
  *
  */
- //---------------------------------------------------
- //  For Mac version:  Uses NewPtr and DisposePtr.
 
 //#include <io.h>
 #include <string.h>
+#include <stdlib.h>
 #include "pqueue.h"
 
 // -------
@@ -70,17 +69,18 @@ void swapelems(PQueue* q,int i, int j)
 
 void re_heapify(PQueue *q)
 {
-   uint head = 0;
+   uint32_t head = 0;
    while (head < q->fullness)
    {
-      uint lchild = LCHILD(head); 
-      uint rchild = RCHILD(head);
-      uint minchild = NULL_CHILD;
+      uint32_t lchild = LCHILD(head);
+      uint32_t rchild = RCHILD(head);
+      uint32_t minchild = NULL_CHILD;
       if (rchild >= q->fullness)
          minchild = lchild;
       if (lchild >= q->fullness)
          minchild = rchild;
       if (minchild == NULL_CHILD)
+	  {
          if (LESS(q,lchild,rchild))
          {
             minchild = lchild;
@@ -89,6 +89,7 @@ void re_heapify(PQueue *q)
          {
             minchild = rchild;
          }
+	  }
       if (minchild < q->fullness && LESS(q,minchild,head))
       {
          swapelems(q,head,minchild);
@@ -101,15 +102,16 @@ void re_heapify(PQueue *q)
 
 void double_re_heapify(PQueue *q, int head)
 {
-   uint lchild = LCHILD(head); 
-   uint rchild = RCHILD(head);
-   uint minchild = NULL_CHILD;
-   uint maxchild = NULL_CHILD;
+   uint32_t lchild = LCHILD(head);
+   uint32_t rchild = RCHILD(head);
+   uint32_t minchild = NULL_CHILD;
+   uint32_t maxchild = NULL_CHILD;
    if (rchild >= q->fullness)
       minchild = lchild;
    if (lchild >= q->fullness)
       minchild = rchild;
    if (minchild == NULL_CHILD)
+   {
       if (LESS(q,lchild,rchild))
       {
          minchild = lchild;
@@ -120,6 +122,7 @@ void double_re_heapify(PQueue *q, int head)
          minchild = rchild;
          maxchild = lchild;
       }
+   }
    if (minchild < q->fullness && LESS(q,minchild,head))
    {
       swapelems(q,head,minchild);
@@ -128,7 +131,7 @@ void double_re_heapify(PQueue *q, int head)
          double_re_heapify(q,maxchild);
    }
 }
-      
+
 // ---------
 // EXTERNALS
 // ---------
@@ -136,19 +139,19 @@ void double_re_heapify(PQueue *q, int head)
 errtype pqueue_init(PQueue* q, int size, int elemsize, QueueCompare comp, bool grow)
 {
    if (size < 1) return ERR_RANGE;
-   q->vec = NewPtr(elemsize*size);
+   q->vec = malloc(elemsize*size);
    if (q->vec == NULL) return ERR_NOMEM;
    if (elemsize > swap_bufsize)
    {
       if (swap_buffer == NULL)
-      	swap_buffer = NewPtr(elemsize);
+      	swap_buffer = malloc(elemsize);
       else
       {
-      	DisposePtr(swap_buffer);
-      	swap_buffer = NewPtr(elemsize);
+      	free(swap_buffer);
+      	swap_buffer = malloc(elemsize);
       }
       swap_bufsize = elemsize;
-      if (MemError()) return ERR_NOMEM;
+      if (swap_buffer == NULL) return ERR_NOMEM;
    }
    q->size = size;
    q->fullness = 0;
@@ -165,11 +168,11 @@ errtype pqueue_insert(PQueue* q, void* elem)
       return ERR_DOVERFLOW;
    while (q->fullness >= q->size)
    {
-      Ptr newp = NewPtr(q->elemsize * q->size*2);
-      if (MemError())
+      void *newp = malloc(q->elemsize * q->size*2);
+      if (newp == NULL)
       	return ERR_NOMEM;
-      BlockMoveData(q->vec, newp, q->size * q->elemsize);
-      DisposePtr(q->vec);
+	  LG_memcpy(newp, q->vec, q->size * q->elemsize);
+      free(q->vec);
       q->vec = newp;
       q->size*=2;
    }
@@ -220,7 +223,7 @@ errtype pqueue_read(PQueue* q, int fd, void (*readfunc)(int fd, void* elem))
    int i;
    read(fd,(char*)q,sizeof(PQueue));
    if (q->grow) q->size = q->fullness;
-   q->vec = NewPtr(q->size*q->elemsize);
+   q->vec = malloc(q->size*q->elemsize);
    if (q->vec == NULL) return ERR_NOMEM;
    for(i = 0; i < q->fullness; i++)
    {
@@ -233,7 +236,7 @@ errtype pqueue_read(PQueue* q, int fd, void (*readfunc)(int fd, void* elem))
 */
 errtype pqueue_destroy(PQueue* q)
 {
-   DisposePtr(q->vec);
+   free(q->vec);
    q->fullness = 0;
    return OK;
 }

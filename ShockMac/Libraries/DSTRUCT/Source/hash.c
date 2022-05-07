@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 /*
  * $Source: n:/project/lib/src/dstruct/RCS/hash.c $
@@ -25,25 +25,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * $Log: hash.c $
  * Revision 1.5  1994/01/18  08:16:06  mahk
  * Added hash_copy
- * 
+ *
  * Revision 1.4  1993/08/09  17:14:59  mahk
  * Fixed the libdbg.h thing.
- * 
+ *
  * Revision 1.3  1993/07/01  12:16:22  mahk
  * changed log2 to hashlog2 to avoid name conflict
- * 
+ *
  * Revision 1.2  1993/06/14  21:11:45  xemu
  * step func
- * 
+ *
  * Revision 1.1  1993/03/25  19:15:09  mahk
  * Initial revision
- * 
+ *
  *
  */
 
 #include <stdlib.h>
 #include <string.h>
-#include "hash.h" 
+#include "hash.h"
 
 //--------------------
 //  Defines
@@ -62,8 +62,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //  Prototypes
 //--------------------
 int hashlog2(int x);
-int expmod(int b, int e, uint m);
-bool is_fermat_prime(uint n, uint numtests);
+int expmod(int b, int e, uint32_t m);
+bool is_fermat_prime(uint32_t n, uint32_t numtests);
 static errtype grow(Hashtable* h, int newsize);
 
 //--------------------
@@ -75,7 +75,7 @@ int hashlog2(int x)
    return 1+hashlog2(x/2);
 }
 
-int expmod(int b, int e, uint m)
+int expmod(int b, int e, uint32_t m)
 {
    if (e == 0) return 1;
    if (e%2 == 0)
@@ -91,7 +91,7 @@ int expmod(int b, int e, uint m)
 
 }
 
-bool is_fermat_prime(uint n, uint numtests)
+bool is_fermat_prime(uint32_t n, uint32_t numtests)
 {
    int i;
    if (n < 3) return FALSE;
@@ -114,10 +114,10 @@ errtype hash_init(Hashtable* h, int elemsize, int vecsize, Hashfunc hfunc, Equfu
    h->fullness = 0;
    h->hfunc = hfunc;
    h->efunc = efunc;
-   h->statvec = (char*)NewPtr(vecsize);
+   h->statvec = (char*) malloc(vecsize);
    if (h->statvec == NULL) return ERR_NOMEM;
    for (i = 0; i < vecsize; i++) h->statvec[i] = HASH_EMPTY;
-   h->vec = (char*)NewPtr(elemsize*vecsize);
+   h->vec = (char*) malloc(elemsize*vecsize);
    if (h->vec == NULL) return ERR_NOMEM;
    return OK;
 }
@@ -125,9 +125,9 @@ errtype hash_init(Hashtable* h, int elemsize, int vecsize, Hashfunc hfunc, Equfu
 errtype hash_copy(Hashtable* t, Hashtable* s)
 {
    *t = *s;
-   t->statvec = NewPtr(t->size);
+   t->statvec =  malloc(t->size);
    if (t->statvec == NULL) return ERR_NOMEM;
-   t->vec = NewPtr(t->elemsize*t->size);
+   t->vec =  malloc(t->elemsize*t->size);
    if (t->vec == NULL) return ERR_NOMEM;
    LG_memcpy(t->vec,s->vec,t->size*t->elemsize);
    LG_memcpy(t->statvec,s->statvec,t->size);
@@ -161,12 +161,13 @@ static int find_index(Hashtable* h, void* elem)
    int j;
    int index;
 //   Spew(DSRC_DSTRUCT_Hash,("find_index(%x,%x) hash is %d\n",h,elem,hash));
-   for (j = 0, index = hash%h->size;  j < h->size && h->statvec[index] == HASH_FULL;
-       j++,index = (index + (1 << hash%h->sizelog2)) % h->size)
+	for (j = 0, index = hash%h->size;  j < h->size && h->statvec[index] == HASH_FULL;
+		 j++,index = (index + (1 << hash%h->sizelog2)) % h->size) {
 //         Spew(DSRC_DSTRUCT_Hash,("find_index(): found status %d\n",h->statvec[index]));
-   if (j >= h->size) index = INDEX_NOT_FOUND;
+	}
+	if (j >= h->size) index = INDEX_NOT_FOUND;
 //   Spew(DSRC_DSTRUCT_Hash,("find_index(): result is %d\n",index));
-   return index;
+	return index;
 }
 
 static errtype grow(Hashtable* h, int newsize)
@@ -178,12 +179,12 @@ static errtype grow(Hashtable* h, int newsize)
    int i;
 //   Spew(DSRC_DSTRUCT_Hash,("grow(%x,%d)\n",h,newsize));
    for (;!is_fermat_prime(newsize,2);newsize++);
-   newvec = NewPtr(newsize*h->elemsize);
+   newvec =  malloc(newsize*h->elemsize);
    if (newvec == NULL) return ERR_NOMEM;
-   newstat = NewPtr(newsize);
+   newstat =  malloc(newsize);
    if (newstat == NULL)
    {
-      DisposePtr (newvec);
+      free (newvec);
       return ERR_NOMEM;
    }
    h->vec = newvec;
@@ -199,8 +200,8 @@ static errtype grow(Hashtable* h, int newsize)
          hash_insert(h,(void*)(oldvec+i*h->elemsize));
       }
    }
-   DisposePtr(oldvec);
-   DisposePtr(oldstat);
+   free(oldvec);
+   free(oldstat);
    return OK;
 }
 
@@ -284,8 +285,8 @@ errtype hash_destroy(Hashtable* h)
 {
    h->size = 0;
    h->fullness = 0;
-   DisposePtr(h->statvec);
-   DisposePtr(h->vec);
+   free(h->statvec);
+   free(h->vec);
    return OK;
 }
 

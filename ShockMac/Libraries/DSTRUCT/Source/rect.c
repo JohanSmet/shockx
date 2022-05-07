@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		Rect.C		Rectangle-handling routines.
 //		Rex E. Bradford (REX)
@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "rect.h"
+#include <stdbool.h>
 
 //	--------------------------------------------------------
 //
@@ -65,14 +66,14 @@ int RectTestSect(LGRect *pr1, LGRect *pr2)
 int RectSect(LGRect *pr1, LGRect *pr2, LGRect *prsect)
 {
 	if (!RECT_TEST_SECT(pr1, pr2))
-		return(FALSE);
+		return false;
 
 	prsect->ul.x = pr1->ul.x > pr2->ul.x ? pr1->ul.x : pr2->ul.x;
 	prsect->lr.x = pr1->lr.x < pr2->lr.x ? pr1->lr.x : pr2->lr.x;
 	prsect->ul.y = pr1->ul.y > pr2->ul.y ? pr1->ul.y : pr2->ul.y;
 	prsect->lr.y = pr1->lr.y < pr2->lr.y ? pr1->lr.y : pr2->lr.y;
 
-	return(TRUE);
+	return true;
 }
 
 //	---------------------------------------------------------
@@ -179,7 +180,7 @@ int RectClipCode(LGRect *prect, LGPoint pt)
 LGPoint MakePoint(short x, short y)
 {
 	LGPoint	pt;
-	
+
 	pt.x = x;
 	pt.y = y;
 	return (pt);

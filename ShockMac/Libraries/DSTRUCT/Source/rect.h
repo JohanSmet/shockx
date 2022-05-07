@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		Rect.H		Rectangle routines header file
 //		Rex E. Bradford (REX)
@@ -24,25 +24,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Revision 1.5  1994/04/05  11:02:15  rex
  * One should endeavor to spend less time writing diatribes about the compiler,.
  * and more time ensuring the veracity of one's code.
- * 
+ *
  * Revision 1.4  1994/04/05  04:04:24  dc
  * how about a make point that isnt a function and works better and so on....
- * 
+ *
  * Revision 1.3  1993/11/08  18:53:28  mahk
  * WHOOOPS
- * 
+ *
  * Revision 1.2  1993/11/08  18:33:47  mahk
  * Added RECT_FILL and MakePoint
- * 
+ *
  * Revision 1.1  1993/04/22  13:06:17  rex
  * Initial revision
- * 
+ *
  * Revision 1.2  1993/04/19  18:35:01  rex
  * Added macro versions of most functions
- * 
+ *
  * Revision 1.1  1992/08/31  17:03:04  unknown
  * Initial revision
- * 
+ *
 */
 
 
@@ -138,7 +138,7 @@ int RectSect(LGRect *pr1, LGRect *pr2, LGRect *prsect);
 int RectClipCode(LGRect *prect, LGPoint pt);
 
 // guess why this isnt a macro        // hah, you cant
-//Point MakePoint(short x, short y);  // Guess what this does. 
+//Point MakePoint(short x, short y);  // Guess what this does.
 //#define MakePoint(x,y) (Point)(((ushort)y<<16)+((ushort)x))
 // oh, doug is mocked, you cant cast to a non-scaler type
 LGPoint MakePoint(short x, short y);

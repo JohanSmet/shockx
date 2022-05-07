@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 //		LList.C		Doubly-linked list
 //		Rex E. Bradford (REX)
@@ -37,10 +37,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include "lg.h"
 #include "llist.h"
-//#include "memall.h"
+#include "memall.h"
 
 void LlistGrowList(LlistHead *plh);
-void LlistInitNodeBlock(LlistHead *plh, llist *pNodeBlock, ushort blockSize);
+void LlistInitNodeBlock(LlistHead *plh, llist *pNodeBlock, uint16_t blockSize);
 
 //	---------------------------------------------------------
 //		LLIST ROUTINES
@@ -52,7 +52,7 @@ void LlistInitNodeBlock(LlistHead *plh, llist *pNodeBlock, ushort blockSize);
 //		nodeSize         = size of each list node, including embedded _llist
 //		numNodesPerBlock = # nodes to allocate in each Malloc() block
 
-void LlistInit(LlistHead *plh, ushort nodeSize, short numNodesPerBlock)
+void LlistInit(LlistHead *plh, uint16_t nodeSize, int16_t numNodesPerBlock)
 {
 //	Initialize basic part of linked list header
 
@@ -140,7 +140,7 @@ void *LlistAddTail(LlistHead *plh)
 //
 //	returns: ptr to list node, with pnext,pprev,prior already filled in
 
-void *LlistAddQueue(LlistHead *plh, short prior)
+void *LlistAddQueue(LlistHead *plh, int16_t prior)
 {
 	queue *plq;
 
@@ -175,7 +175,7 @@ void *LlistAddQueue(LlistHead *plh, short prior)
 //	returns: TRUE if item was actually moved in list, false if newprior
 //		didn't cause it to switch places with other nodes.
 
-bool LlistMoveQueue(LlistHead *plh, void *pnode, short newprior)
+bool LlistMoveQueue(LlistHead *plh, void *pnode, int16_t newprior)
 {
 	((queue *) pnode)->priority = newprior;
 	return(llist_move_queue((llist_head *)plh, (queue *)pnode));
@@ -210,7 +210,7 @@ void LlistFree(LlistHead *plh, void *pnode)
 void LlistFreeAll(LlistHead *plh)
 {
 	llist *pnb;
-	ushort blockSize;
+	uint16_t blockSize;
 
 //	Init head & tail ptrs, zero num nodes
 
@@ -243,7 +243,7 @@ void LlistDestroy(LlistHead *plh)
 	while (pnb)
 	{
 		pnbNext = pnb->pnext;
-		DisposePtr((Ptr)pnb);
+		free(pnb);
 		pnb = pnbNext;
 	}
 
@@ -266,13 +266,13 @@ void LlistDestroy(LlistHead *plh)
 
 void LlistGrowList(LlistHead *plh)
 {
-	ushort blockSize;
+	uint16_t blockSize;
 	llist *pNewStore;
 
 //	Allocate new storage block
 
 	blockSize = plh->nodeSize * plh->numNodesPerBlock;
-	pNewStore = (llist *)NewPtr(sizeof(llist) + blockSize);
+	pNewStore = (llist *) malloc(sizeof(llist) + blockSize);
 
 //	Link it in to the node store list
 
@@ -292,7 +292,7 @@ void LlistGrowList(LlistHead *plh)
 //		pNodeBlock = ptr to node block to initialize
 //		blockSize  = size of the block
 
-void LlistInitNodeBlock(LlistHead *plh, llist *pNodeBlock, ushort blockSize)
+void LlistInitNodeBlock(LlistHead *plh, llist *pNodeBlock, uint16_t blockSize)
 {
 	llist *pll;
 

@@ -65,6 +65,28 @@ target_sources(${TARGET_LIB_LG} PRIVATE
 target_include_directories(${TARGET_LIB_LG} PUBLIC ${DIR_LIB_LG})
 target_link_libraries(${TARGET_LIB_LG} PUBLIC ${TARGET_LIB_FIX})
 
+# DSTRUCT
+set (TARGET_LIB_DSTRUCT dstruct)
+set (DIR_LIB_DSTRUCT ${DIR_LIB}/DSTRUCT/Source)
+
+add_library(${TARGET_LIB_DSTRUCT} STATIC)
+target_sources(${TARGET_LIB_DSTRUCT} PRIVATE
+	${DIR_LIB_DSTRUCT}/array.c
+	${DIR_LIB_DSTRUCT}/array.h
+	${DIR_LIB_DSTRUCT}/hash.c
+	${DIR_LIB_DSTRUCT}/hash.h
+	${DIR_LIB_DSTRUCT}/llist.c
+	${DIR_LIB_DSTRUCT}/llist.h
+	${DIR_LIB_DSTRUCT}/lllist.c
+	${DIR_LIB_DSTRUCT}/pqueue.c
+	${DIR_LIB_DSTRUCT}/pqueue.h
+	${DIR_LIB_DSTRUCT}/rect.c
+	${DIR_LIB_DSTRUCT}/rect.h
+	${DIR_LIB_DSTRUCT}/slist.h
+)
+target_include_directories(${TARGET_LIB_DSTRUCT} PUBLIC ${DIR_LIB_DSTRUCT})
+target_link_libraries(${TARGET_LIB_DSTRUCT} PUBLIC ${TARGET_LIB_LG})
+
 # RES
 set (TARGET_LIB_RES res)
 set (DIR_LIB_RES ${DIR_LIB}/RES/Source)
