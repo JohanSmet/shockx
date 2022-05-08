@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lg.h"
 #include "fix.h"
 #include "error.h"
-//#include "2d.h"
+#include "2d.h"
 #include <stdlib.h>
 
 /*

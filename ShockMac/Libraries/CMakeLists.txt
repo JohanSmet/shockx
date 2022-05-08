@@ -88,15 +88,16 @@ target_include_directories(${TARGET_LIB_DSTRUCT} PUBLIC ${DIR_LIB_DSTRUCT})
 target_link_libraries(${TARGET_LIB_DSTRUCT} PUBLIC ${TARGET_LIB_LG})
 
 # PALETTE
-#set (TARGET_LIB_PALETTE palette)
-#set (DIR_LIB_PALETTE ${DIR_LIB}/PALETTE/Source)
+set (TARGET_LIB_PALETTE palette)
+set (DIR_LIB_PALETTE ${DIR_LIB}/PALETTE/Source)
 #
-#add_library(${TARGET_LIB_PALETTE} STATIC)
-#target_sources(${TARGET_LIB_PALETTE} PRIVATE
-#	${DIR_LIB_PALETTE}/palette.c
-#	${DIR_LIB_PALETTE}/palette.h
-#)
-#target_link_libraries(${TARGET_LIB_PALETTE} PUBLIC ${TARGET_LIB_LG})
+add_library(${TARGET_LIB_PALETTE} STATIC)
+target_sources(${TARGET_LIB_PALETTE} PRIVATE
+	${DIR_LIB_PALETTE}/palette.c
+	${DIR_LIB_PALETTE}/palette.h
+)
+target_include_directories(${TARGET_LIB_PALETTE} PUBLIC ${DIR_LIB}/2D/Source)
+target_link_libraries(${TARGET_LIB_PALETTE} PUBLIC ${TARGET_LIB_LG})
 
 # RES
 set (TARGET_LIB_RES res)
