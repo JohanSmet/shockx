@@ -106,8 +106,8 @@ static MunitResult test_gauss16_range_integer(const MunitParameter params[], voi
 }
 
 static MunitResult test_gauss16_range_fix(const MunitParameter params[], void* user_data_or_fixture) {
-	RNDSTREAM_GAUSS16FAST(rsGauss16Fast);
-    return test_range_fix(&rsGauss16Fast);
+	RNDSTREAM_GAUSS16(rsGauss16);
+    return test_range_fix(&rsGauss16);
 }
 
 static MunitResult test_gauss16fast_range_zero_one(const MunitParameter params[], void* user_data_or_fixture) {

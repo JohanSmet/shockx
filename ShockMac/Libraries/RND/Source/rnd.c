@@ -130,8 +130,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //  Get the high 32-bit result of the unsigned multiply of 2 32-bit numbers.
 //	---------------------------------------------------------------
 
-uint32_t high_umpy(uint32_t a, uint32_t b) {
-	uint64_t res = a * b;
+static inline int32_t high_umpy(uint32_t a, uint32_t b) {
+	uint64_t res = (uint64_t) a * b;
 	return res >> 32;
 }
 
@@ -149,7 +149,7 @@ uint32_t high_umpy(uint32_t a, uint32_t b) {
 
 int32_t RndRange(RndStream *prs, int32_t low, int32_t high)
 {
-	return low + ((Rnd(prs) >> 16) % (high - low + 1));
+	return low + high_umpy(Rnd(prs), (high - low + 1));
 }
 
 //	----------------------------------------------------------------
