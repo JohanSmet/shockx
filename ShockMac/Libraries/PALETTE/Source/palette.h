@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 #ifndef __PALETTE_H
 #define __PALETTE_H
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "lg.h"
 #include "fix.h"
 #include "error.h"
-#include "2d.h"
+//#include "2d.h"
 #include <stdlib.h>
 
 /*
@@ -69,8 +69,8 @@ typedef struct {
    short       		entry_1;			// Doubles to hold cmap_index for Cycles
    short       		entry_n;			// Doubles to hold curr_color for Cycles
    short       		range;				// Cmap range used (shift/bank)/#cols (cycle)
-   uchar       		*from_pal;		// Doubles to hold colors array for Cycles
-   uchar       		*to_pal;			// sometimes useless
+   uint8_t       		*from_pal;		// Doubles to hold colors array for Cycles
+   uint8_t       		*to_pal;			// sometimes useless
 } PAL_TABLE_ENTRY;
 
 /*
@@ -88,30 +88,30 @@ typedef struct {
 extern void palette_initialize(short table_size);
 extern void palette_set_rate(short time_units_per_step);
 extern void palette_shutdown();
-extern void palette_init_smap(short first, short last, uchar *from, uchar *to,
+extern void palette_init_smap(short first, short last, uint8_t *from, uint8_t *to,
                               short num_steps);
 
-extern byte palette_install_effect(PAL_TYPE type,
+extern uint8_t palette_install_effect(PAL_TYPE type,
                                    PAL_MODE mode,	// SHIFT  CYCLE  CBANK
                                    short b1,         		// first  index  first
                                    short b2,         		// last   #cols  last
                                    short b3,         		// delay  delay  delay
                                    short b4,         		// #steps --     --
-                                   uchar *ptr1,      	// from   colors --
-                                   uchar *ptr2);     	// to     --     --
+                                   uint8_t *ptr1,      	// from   colors --
+                                   uint8_t *ptr2);     	// to     --     --
 
-extern errtype palette_remove_effect(byte id);
-extern errtype palette_freeze_effect(byte id);
-extern errtype palette_unfreeze_effect(byte id);
-extern void palette_advance_effect(byte id, int steps); // DON'T call this
+extern errtype palette_remove_effect(uint8_t id);
+extern errtype palette_freeze_effect(uint8_t id);
+extern errtype palette_unfreeze_effect(uint8_t id);
+extern void palette_advance_effect(uint8_t id, int steps); // DON'T call this
 extern void palette_advance_all_fx(long timestamp);  // Call this, rather...
-extern PAL_STATUS palette_query_effect(byte id);
-extern void palette_change_delay(byte id, short delay);
+extern PAL_STATUS palette_query_effect(uint8_t id);
+extern void palette_change_delay(uint8_t id, short delay);
 extern void palette_swap_shadow(int s, int n, int d);
 
 extern void palette_print_table();
 
-extern byte num_installed_shifts;
+extern uint8_t num_installed_shifts;
 
 #endif // __PALETTE_H
 
