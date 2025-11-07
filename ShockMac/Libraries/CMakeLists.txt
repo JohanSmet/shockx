@@ -90,7 +90,7 @@ target_link_libraries(${TARGET_LIB_DSTRUCT} PUBLIC ${TARGET_LIB_LG})
 # PALETTE
 set (TARGET_LIB_PALETTE palette)
 set (DIR_LIB_PALETTE ${DIR_LIB}/PALETTE/Source)
-#
+
 add_library(${TARGET_LIB_PALETTE} STATIC)
 target_sources(${TARGET_LIB_PALETTE} PRIVATE
 	${DIR_LIB_PALETTE}/palette.c
@@ -98,6 +98,32 @@ target_sources(${TARGET_LIB_PALETTE} PRIVATE
 )
 target_include_directories(${TARGET_LIB_PALETTE} PUBLIC ${DIR_LIB}/2D/Source)
 target_link_libraries(${TARGET_LIB_PALETTE} PUBLIC ${TARGET_LIB_LG})
+
+# 2D
+set (TARGET_LIB_2D 2d)
+set (DIR_LIB_2D ${DIR_LIB}/2D/Source)
+
+add_library(${TARGET_LIB_2D} STATIC)
+target_sources(${TARGET_LIB_2D} PRIVATE
+	${DIR_LIB_2D}/2d.h
+	${DIR_LIB_2D}/bit.c
+	${DIR_LIB_2D}/bit.h
+	${DIR_LIB_2D}/bitmap.c
+	${DIR_LIB_2D}/bitmap.h
+	${DIR_LIB_2D}/blend.c
+	${DIR_LIB_2D}/blend.h
+	${DIR_LIB_2D}/blncon.h
+	${DIR_LIB_2D}/blndat.h
+	${DIR_LIB_2D}/blnfcn.h
+	${DIR_LIB_2D}/buffer.c
+	${DIR_LIB_2D}/buffer.h
+	${DIR_LIB_2D}/canvas.c
+	${DIR_LIB_2D}/canvas.h
+	${DIR_LIB_2D}/chain.c
+	${DIR_LIB_2D}/chain.h
+)
+target_link_libraries(${TARGET_LIB_2D} PUBLIC ${TARGET_LIB_LG})
+
 
 # RES
 set (TARGET_LIB_RES res)

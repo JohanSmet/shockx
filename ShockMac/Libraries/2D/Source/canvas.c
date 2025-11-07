@@ -6,15 +6,15 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 */
 /*
  * $Source: r:/prj/lib/src/2d/RCS/canvas.c $
@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Canvas handling routines.
  *
- */ 
+ */
 
-#include "grs.h"
-#include "grd.h"
+#include "GR/grs.h"
+#include "GR/grd.h"
 #include "bitmap.h"
 #include "chain.h"
 #include "cnvdat.h"
@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ctxmac.h"
 #include "fcntab.h"
 #include "fill.h"
-#include "grmalloc.h"
+#include "GR/grmalloc.h"
 #include "lintab.h"
 #include "tabdat.h"
 #include "valloc.h"
@@ -98,7 +98,7 @@ grs_canvas *gr_pop_canvas (void)
 #pragma scheduling off
 #pragma global_optimizer off
 
-void gr_init_canvas (grs_canvas *c, uchar *p, int type, short w, short h)
+void gr_init_canvas (grs_canvas *c, uint8_t *p, int type, short w, short h)
 {
 #ifdef GR_DOUBLE_CANVAS
    if (type==BMT_FLAT8_DOUBLE) {
@@ -136,14 +136,14 @@ void gr_make_canvas (grs_bitmap *bm, grs_canvas *c)
 grs_canvas *gr_alloc_canvas (int type, short w, short h)
 {
    grs_canvas *c;
-   uchar *p;
+   uint8_t *p;
 
-   if ((c=(grs_canvas *)NewPtr (sizeof (*c))) == NULL)	// was Malloc
+   if ((c=(grs_canvas *) gr_malloc (sizeof (*c))) == NULL)
       return NULL;
    if (type == BMT_DEVICE)
       p = valloc (w,h);
    else
-      p = (uchar *)NewPtr (w*h);// was Malloc
+      p = (uint8_t *) gr_malloc (w*h);
    gr_init_canvas (c, p, type, w, h);
 
    return c;
@@ -154,8 +154,8 @@ void gr_free_canvas (grs_canvas *c)
    if (c->bm.type == BMT_DEVICE)
       vfree (c->bm.bits);
    else
-      DisposePtr ((Ptr) c->bm.bits);	// was gr_free
-   DisposePtr ((Ptr) c);	// was gr_free
+      gr_free (c->bm.bits);	// was gr_free
+   gr_free (c);	// was gr_free
 }
 
 grs_canvas *gr_alloc_sub_canvas (grs_canvas *c, short x, short y,
@@ -163,7 +163,7 @@ grs_canvas *gr_alloc_sub_canvas (grs_canvas *c, short x, short y,
 {
    grs_canvas *c_new;
 
-   c_new = (grs_canvas *)NewPtr (sizeof (*c_new));// was Malloc
+   c_new = (grs_canvas *) gr_malloc (sizeof (*c_new));
    if (c_new != NULL)
       gr_init_sub_canvas (c, c_new, x, y, w, h);
    return c_new;
@@ -171,5 +171,5 @@ grs_canvas *gr_alloc_sub_canvas (grs_canvas *c, short x, short y,
 
 void gr_free_sub_canvas (grs_canvas *c)
 {
-   DisposePtr ((Ptr) c);	// was gr_free
+   gr_free (c);
 }
